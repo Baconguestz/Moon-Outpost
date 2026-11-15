@@ -1,0 +1,18 @@
+{
+  "name": "moon-outpost",
+  "version": "1.0.0",
+  "description": "Team Lunar Capital game for the NASA Space Apps Global Hackathon 2026",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "nasa-space-apps",
+    "game",
+    "canvas",
+    "html5"
+  ],
+  "author": "Team Lunar Capital",
+  "license": "UNLICENSED"
+}

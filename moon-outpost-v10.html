@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Moon Outpost</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#3a1fb8;--ink:#fff;--pan:#fff9e6;--line:#14123a;--mute:#e1dcff;--dk:#14123a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at 15% 0,#7c3aed 0,transparent 45%),radial-gradient(circle at 95% 100%,#ec4899 0,transparent 40%),var(--bg);color:var(--ink);font:16px/1.4 "Fredoka","Baloo 2","Nunito","Trebuchet MS","Segoe UI",system-ui,sans-serif;font-weight:600}
+main{max-width:780px;margin:0 auto;padding:10px}
+h1{font-size:1.5rem;margin:0 0 6px}h2{font-size:1.15rem;margin:8px 0 4px}
+.hud{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px}
+.hb{background:var(--pan);color:var(--dk);border:3px solid var(--dk);border-radius:12px;padding:3px 7px;font-size:.78rem;box-shadow:0 3px 0 var(--dk)}
+.hb i{display:block;height:9px;margin-top:2px;background:#0003;border-radius:6px;overflow:hidden}.hb i b{display:block;height:100%;width:100%;background:#4ade80;transition:width .15s}
+.info{display:flex;justify-content:space-between;gap:6px;font-size:.84rem;margin-bottom:6px;flex-wrap:wrap;text-shadow:0 2px 0 #14123a88}
+.wrap{position:relative;border:4px solid var(--dk);border-radius:18px;overflow:hidden;background:#000;box-shadow:0 6px 0 var(--dk)}
+canvas{display:block;width:100%;aspect-ratio:8/5}
+#mc{position:absolute;left:0;top:0;width:100%;height:100%;aspect-ratio:auto;display:none}
+#ov{position:relative;z-index:1;background:#0b0e26;color:#eef0ff;padding:14px}#ov[hidden]{display:none}
+#ov.menu{background:transparent;min-height:760px;padding:10px}
+.row{display:flex;align-items:center;gap:8px;padding:5px 0;border-top:1px solid #8b82ff66}
+.row div{flex:1}.row small,.sm{display:block;color:#a9aedd;font-weight:400;font-size:.76rem}
+button{font:inherit;cursor:pointer;background:var(--pan);color:var(--dk);border:3px solid var(--dk);border-radius:12px;padding:6px 12px;box-shadow:0 3px 0 var(--dk);transition:transform .08s}
+button:active:not(:disabled){transform:translateY(3px);box-shadow:0 0 0 var(--dk)}
+button:disabled{opacity:.4;cursor:not-allowed}button:focus-visible{outline:3px solid #f5b301}
+button.go{background:#facc15;color:var(--dk);width:100%;padding:12px;font-size:1.1rem;font-weight:700;margin-top:8px}
+.st{width:36px;height:36px;padding:0;font-size:1.2rem;background:#7c3aed;color:#fff}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ctl{display:flex;justify-content:center;align-items:center;gap:10px;margin-top:10px;touch-action:none;flex-wrap:wrap}
+.pad{display:grid;grid-template-columns:repeat(3,50px);grid-template-rows:repeat(2,46px);gap:5px}
+.ctl button{padding:0;touch-action:none;user-select:none;font-size:1.1rem}
+.ab{width:62px;height:62px;border-radius:50%;font-size:.7rem!important;background:#facc15;color:var(--dk)}
+.big{font-size:3.4rem;text-align:center;margin:0}
+.mut{color:var(--mute);font-weight:400;font-size:.78rem;text-align:center;margin:10px 0}
+ul{margin:4px 0;padding-left:1.1em;font-weight:400}details{margin:6px 0;font-weight:400}
+/* tips */
+.tip{display:flex;align-items:center;gap:8px;background:var(--pan);color:var(--dk);border:3px solid var(--dk);border-radius:16px;padding:6px 10px;margin-bottom:8px;box-shadow:0 4px 0 var(--dk);font-size:.92rem;min-height:48px}
+.tip[hidden]{display:none}
+.tip .av{font-size:1.7rem;animation:bob 2s ease-in-out infinite}
+/* menu */
+.mwrap{max-width:470px;margin:0 auto;text-align:center;padding-bottom:120px}
+.logo{margin:4px 0 6px;animation:bob 3s ease-in-out infinite}
+.logo .mo{font-size:3rem;display:block;filter:drop-shadow(0 0 14px #ffe14d)}
+.logo h1{margin:0;font-size:clamp(2.6rem,11vw,4.4rem);line-height:.92;letter-spacing:1px;color:#ffe14d;-webkit-text-stroke:3px var(--dk);paint-order:stroke fill;text-shadow:0 6px 0 var(--dk),0 0 28px #ff6bd6}
+.logo p{margin:8px 0 0;font-size:1.15rem;color:#fff;text-shadow:0 2px 0 var(--dk)}
+.mh{font-size:2rem;margin:6px 0 8px;color:#ffe14d;-webkit-text-stroke:2px var(--dk);paint-order:stroke fill;text-shadow:0 4px 0 var(--dk)}
+@keyframes bob{50%{transform:translateY(-6px) rotate(-1deg)}}
+.mbs{display:grid;gap:14px;margin:16px auto 0;max-width:340px}
+.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:430px;margin:18px auto 0}
+.mb{display:block;width:100%;font:inherit;font-size:1.55rem;font-weight:700;padding:12px 10px;color:#fff;text-shadow:0 2px 0 #0006;border:4px solid var(--dk);border-radius:18px;box-shadow:0 7px 0 var(--dk),inset 0 4px 0 #fff5;margin-top:12px;transition:transform .1s}
+.mb:hover:not(:disabled){transform:translateY(-3px) scale(1.03)}
+.mb:active:not(:disabled){transform:translateY(5px);box-shadow:0 2px 0 var(--dk),inset 0 4px 0 #fff5}
+.mbs .mb{margin-top:0}
+.mini .mb{font-size:.95rem;padding:9px 4px;margin-top:0;border-radius:14px;box-shadow:0 5px 0 var(--dk),inset 0 3px 0 #fff5}
+.mb small{display:block;font-size:.62em;font-weight:600;opacity:.95}
+.mb.g{background:linear-gradient(#4ade80,#16a34a)}.mb.b{background:linear-gradient(#60a5fa,#2563eb)}
+.mb.o{background:linear-gradient(#fdba74,#ea580c)}.mb.p{background:linear-gradient(#c084fc,#7e22ce)}
+.mb.c{background:linear-gradient(#67e8f9,#0891b2)}.mb.y{background:linear-gradient(#fde047,#eab308);color:var(--dk);text-shadow:none}
+.mb.bk{font-size:1.1rem;margin:16px auto 0;max-width:210px}
+.panel{background:var(--pan);color:var(--dk);border:4px solid var(--dk);border-radius:20px;box-shadow:0 6px 0 var(--dk);padding:10px 12px;text-align:left;margin-top:8px}
+.panel p{margin:4px 0}.panel .row{border-top:2px dashed #14123a33}.panel .row:first-child{border-top:0}
+.panel .row small,.panel .sm{color:#5a5690}
+.panel h2{margin-top:2px}
+.tg{min-width:66px;background:#e5e7eb;color:var(--dk);font-weight:700}.tg.on{background:#4ade80}
+.rg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rc{background:var(--pan);color:var(--dk);border:3px solid var(--dk);border-radius:16px;box-shadow:0 4px 0 var(--dk);padding:8px;text-align:center}
+.rc span{font-size:1.8rem;display:block}.rc b{font-size:1.5rem;display:block;line-height:1.1}.rc small{color:#5a5690;font-weight:600;font-size:.76rem}
+.chip{display:inline-block;background:var(--dk);color:#fff;border-radius:999px;padding:3px 12px;font-size:.82rem;margin:2px 0}
+.mood{font-size:3rem;line-height:1;margin:0;text-align:center}
+.tick{margin:16px auto 0;max-width:520px;overflow:hidden;white-space:nowrap;background:#14123acc;border:3px solid #ffe14d;border-radius:999px;padding:5px 0;color:#fff;font-size:.86rem}
+.tick span{display:inline-block;padding-left:100%;animation:mq 20s linear infinite}
+@keyframes mq{to{transform:translateX(-100%)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}.tick span{padding-left:0}}
+
+main{max-width:1180px}
+.layout{display:grid;grid-template-columns:310px 1fr;gap:14px;align-items:start}
+.game{min-width:0}
+#side{position:sticky;top:8px;max-height:calc(100vh - 16px);overflow:auto;background:var(--pan);color:var(--dk);border:4px solid var(--dk);border-radius:20px;box-shadow:0 6px 0 var(--dk);padding:10px 12px;font-size:.9rem}
+#side h2{font-size:1.25rem;margin:2px 0 4px}
+#side a{color:#5b21b6;font-weight:600;font-size:.8rem}
+#side p{margin:4px 0;font-weight:400}
+.lv{background:var(--dk);color:#fff;border-radius:14px;padding:8px 10px;margin:6px 0}
+.sbtabs{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0}
+.sbtabs button,.tab{padding:3px 9px;font-size:.8rem;border-radius:999px;box-shadow:0 2px 0 var(--dk)}
+.sbtabs button.on,.tab.on{background:#facc15}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.ph{border-top:2px dashed #14123a33;padding:4px 0}
+.ph summary{cursor:pointer;font-weight:700}
+.ph .gm{background:#e0f2fe;border-radius:10px;padding:4px 8px}
+.fixrow{background:#fff;border:2px solid var(--dk);border-radius:12px;padding:6px 8px;margin:6px 0}
+.fixrow b{display:block}
+.prob{background:#ef4444;color:#fff;border:3px solid var(--dk);border-radius:14px;padding:6px 10px;margin-bottom:8px;font-size:.9rem;box-shadow:0 4px 0 var(--dk);animation:flash 1s steps(2) infinite}
+.prob[hidden]{display:none}
+@keyframes flash{50%{background:#f97316}}
+.mini{grid-template-columns:repeat(2,1fr)}.mini .mb{font-size:1rem}
+@media(max-width:920px){.layout{grid-template-columns:1fr}#side{position:static;max-height:none;order:2}}
+.tip.tut{font-size:1.08rem;border-color:#7c3aed;box-shadow:0 4px 0 #7c3aed}#tt{flex:1}.tip button{padding:4px 10px;font-size:.85rem;white-space:nowrap}.tip button[hidden]{display:none}
+.qq{background:#fff;border:3px solid var(--dk);border-radius:14px;padding:8px 10px;margin:6px 0;font-size:1rem;font-weight:700}
+.qo{display:block;width:100%;text-align:left;margin:6px 0;font-size:.9rem;padding:7px 10px}
+.qo:disabled{opacity:1;cursor:default}.qo.ok{background:#4ade80}.qo.no{background:#fca5a5}
+.fw{display:inline-block;font-size:2.2rem;margin:0 6px;animation:bob 1.4s ease-in-out infinite}
+.layout{display:block}main{max-width:860px}
+.panel .ph p,.panel .fixrow,.panel li{font-weight:400}
+.panel a{color:#5b21b6;font-weight:600}
+.ez{display:flex;align-items:center;gap:12px}.ez span{font-size:3rem;line-height:1}.ez b{font-size:1.2rem;line-height:1.3}
+</style>
+</head>
+<body>
+<main>
+<div class="layout"><section class="game">
+<div class="hud">
+<div class="hb">💨 Air <span id="vo"></span><i><b id="bo"></b></i></div>
+<div class="hb">🍎 Food <span id="vf"></span><i><b id="bf"></b></i></div>
+<div class="hb">❤️ Health <span id="vh"></span><i><b id="bh"></b></i></div>
+<div class="hb">⚡ Stamina <span id="vs"></span><i><b id="bs"></b></i></div>
+</div>
+<div class="info"><span id="d"></span><span id="c"></span><span id="n"></span><span id="s"></span></div>
+<div class="info"><span id="r"></span></div>
+<div class="info"><span id="ms"></span></div>
+<div class="prob" id="pr" hidden></div>
+<div class="tip" id="tip" hidden><span class="av">👩‍🚀</span><span id="tt"></span><button id="tn" hidden onclick="tutNext()">Next ➜</button><button id="tk" hidden onclick="tutSkip()">Quit ✖</button></div>
+<div class="wrap"><canvas id="cv" width="800" height="500" aria-label="Moon surface"></canvas><canvas id="mc" aria-hidden="true"></canvas><div id="ov"></div></div>
+<div class="ctl" id="ctl"><div class="pad"><span></span><button data-k="up" aria-label="up">▲</button><span></span><button data-k="left" aria-label="left">◀</button><button data-k="down" aria-label="down">▼</button><button data-k="right" aria-label="right">▶</button></div>
+<button class="ab" data-k="sprint">💨 Sprint<br>(Shift)</button><button class="ab" data-k="mine">⛏ Mine<br>(E)</button><button class="ab" data-k="eat">🥬 Meal<br>(F)</button><button class="ab" data-k="fix" style="background:#4ade80">🔧 Fix<br>(R)</button><button class="ab" data-k="snack" style="background:#fb923c">🍱 Snack<br>(Q)</button><button class="ab" id="bb" style="background:#4aa3ff">⚙ Base<br>(B)</button></div>
+<p class="mut">🎮 WASD or arrows = walk · Shift = zoom · hold E = dig · hold F = eat (in base) · B = base shop & power · R = fix things · Q = quick snack · 1-9 = pick a snack. 📡 Sun-flare facts come from NASA's DONKI space-weather database (live when the internet allows, a saved copy otherwise). Numbers are made simpler for kids!</p>
+</section></div>
+</main>
+<script>
+const $=s=>document.querySelector(s),cv=$("#cv"),cx=cv.getContext("2d");
+const VW=800,VH=500,WW=3200,WH=2000,Z={x:1440,y:930,w:330,h:150};
+const T=[["Basalt","Common",1,"#9aa0b0",0,"🧱 A plain grey rock. Builders can use it to make walls!"],["Anorthosite","Uncommon",3,"#eef1fa",0,"✨ A shiny white rock from the bright hills. We can get metal out of it!"],["Pyroxene","Uncommon",5,"#d9a066",1.2,"🟠 A crunchy orange rock with metal hiding inside!"],["Ilmenite","Rare",8,"#4aa3ff",2,"💙 A blue rock with air hiding inside! It could help astronauts breathe!"],["Water Ice","Rare",12,"#9ff3ff",2.5,"🧊 Frozen water! Astronauts can drink it, breathe it and make rocket fuel!"],["Meteorite","Rare",12,"#ff9f43",2.5,"☄️ A space rock that fell from the sky and went BONK on the Moon!"],["Olivine","Epic",20,"#7ee26b",3.5,"💚 A green gem-rock that grows deep inside planets!"],["Helium-3","Epic",35,"#ffe14d",4,"💛 Tiny, tiny bits hide in Moon dust. Scientists dream about using it for fuel!"],["Moon Opal","Legendary",50,"#ff6bd6",5,"🌈 A pretend super-rare gem that only lives in this game!"]];
+const CL=[["C-class",.6],["M-class",1],["X-class",1.6]],ZN=["Highlands","Dark plains","Central plain","Shadowed craters","Meteor field"];
+const U=[["tank","💨 Oxygen tank","+30 air per level"],["bag","🎒 Bigger bag","+4 slots per level"],["drill","⛏ Faster drill","−25% mining time"],["lining","🛡️ Radiation lining","−20% flare damage"],["gen","⚡ Generator","+10 kW and a new solar panel"],["rover","🤖 Rover scanner","Rover grabs nearby rocks"],["chef","👩‍🍳 Space chef","Foods are 20% stronger per level"],["garden","🌱 Garden","Greenhouse grows meals 30% faster per level"],["pantry","🗄️ Pantry shelves","+3 snack slots per level"]],COST=[40,80,140];
+const defMeta=()=>({cr:0,lv:{tank:0,bag:0,drill:0,lining:0,gen:0,rover:0,chef:0,garden:0,pantry:0},set:{snd:1,shk:1,tip:1},rec:{runs:0,pts:0,rocks:0,opals:0,b300:0,b600:0,gr:"-",blk:0,fix:0,mis:0,tl:[0,0,0,0,0,0,0,0,0],eb:0,et:0},quiz:{best:0,got:{}},camp:{done:[0,0,0],best:[0,0,0],fin:0}});
+let meta=defMeta();
+try{const s=JSON.parse(localStorage.getItem("moonOutpostV5"));if(s&&s.lv){const dd=defMeta();meta=Object.assign({},s);meta.set=Object.assign(dd.set,s.set);meta.rec=Object.assign(dd.rec,s.rec);meta.quiz=Object.assign(dd.quiz,s.quiz);meta.camp=Object.assign(dd.camp,s.camp)}}catch(e){}
+const save=()=>{try{localStorage.setItem("moonOutpostV5",JSON.stringify(meta))}catch(e){}};
+const L=k=>meta.lv[k]|0,maxO2=()=>100+30*L("tank"),cap=()=>8+4*L("bag"),gen=()=>30+10*L("gen")+(G.day>1?5:0);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),inB=(x,y)=>x>Z.x&&x<Z.x+Z.w&&y>Z.y&&y<Z.y+Z.h,zone=(x,y)=>y<520?3:y>1500?4:x<1050?0:x>2150?1:2;
+const PAL=[["#a7aabd","#9da1b6","#b1b4c7","#9599ae"],["#6f7390","#686c8a","#777b99","#62667f"],["#8d91a6","#868aa0","#9498ad","#7f8398"],["#5d6a88","#566280","#667391","#4f5a76"],["#9a8678","#927e70","#a39080","#8a7668"]];
+const bg=document.createElement("canvas");bg.width=WW;bg.height=WH;const bx=bg.getContext("2d"),CR=[];
+(function(){for(let x=0;x<WW;x+=4)for(let y=0;y<WH;y+=4){const z=zone(x,y);bx.fillStyle=z==3&&Math.random()<.012?"#dff6ff":PAL[z][Math.random()*4|0];bx.fillRect(x,y,4,4)}
+for(let i=0;i<90;i++){const x=60+Math.random()*(WW-120),y=60+Math.random()*(WH-120),r=14+Math.random()*52;if(Math.hypot(x-1600,y-1000)<r+260){i--;continue}CR.push({x,y,r});
+for(let tx=x-r;tx<x+r;tx+=4)for(let ty=y-r;ty<y+r;ty+=4){const d=Math.hypot(tx-x,ty-y);if(d<r*.82){bx.fillStyle=(tx+ty)%8?"#4d5068":"#565972";bx.fillRect(tx,ty,4,4)}else if(d<r){bx.fillStyle=ty<y?"#bcc0d4":"#41445a";bx.fillRect(tx,ty,4,4)}}}})();
+let G={ph:"menu"},K={},AC,MS="home";
+function beep(f,d){if(!meta.set.snd)return;try{AC=AC||new AudioContext();const o=AC.createOscillator(),g=AC.createGain();o.frequency.value=f;g.gain.value=.04;o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d)}catch(e){}}
+function pickRock(x,y){const m=1+Math.hypot(x-1600,y-1000)/700,W=[[15,40,25,5,0,0,8,4,1],[40,5,10,30,0,0,8,6,2],[45,20,10,10,0,0,6,3,1],[20,5,5,10,45,0,8,5,2],[10,5,10,10,0,40,15,8,2]][zone(x,y)].map((v,i)=>i>=6?v*m:v);let r=Math.random()*W.reduce((a,b)=>a+b),k=0;for(;k<8;k++){r-=W[k];if(r<0)break}return k}
+function spawnRock(){for(let n=0;n<60;n++){let x,y;if(Math.random()<.4){const c=CR[Math.random()*CR.length|0],a=Math.random()*6.28;x=c.x+Math.cos(a)*c.r*.9;y=c.y+Math.sin(a)*c.r*.9}else{x=20+Math.random()*(WW-40);y=20+Math.random()*(WH-40)}
+if(x<12||y<12||x>WW-12||y>WH-12||(x>Z.x-140&&x<Z.x+Z.w+140&&y>Z.y-140&&y<Z.y+Z.h+170))continue;G.rocks.push({x,y,k:pickRock(x,y)});return}}
+function begin(dur,tut){const tt=!!tut,en=SEL.end&&!tt,dy=tt?null:DAYS[en?2:SEL.day-1],dd=DIF[tt?0:SEL.dif],H=en?3600:dur,fq=dy?dd.haz*dy.f:1,mq=dy?dd.haz*dy.m:1;G={ph:"play",cfg:dy,d:dd,day:tt||en?0:SEL.day,end:en?1:0,H,goal:dy&&!en?Math.round(dy.goal*dur/300*dd.goal):0,built:0,cme:null,roff:0,vx:0,vy:0,hph:0,lh:0,pops:[],l2:0,lf:0,dur:en?1e9:dur,t:0,score:0,tally:[0,0,0,0,0,0,0,0,0],hp:100,o2:maxO2(),food:80,ration:2,rp:0,exp:0,maxE:0,carry:[],x:1610,y:1070,fx:1,at:0,mv:0,spr:0,stm:100,wind:0,srest:0,spT:0,nB:0,seen:{},pt:[],pa:0,door:0,rocks:[],scars:[],fl:[],fb:[],mt:[],pw:{l:10,g:10,s:10},rv:{x:1570,y:1085,fx:1,a:0},last:"Explore, mine rocks and bank them in the base!",prog:0,stun:0,sp:12,shake:0,flash:0,fs:0,brown:0,pause:false,tg:"👋 Hi! Use WASD or arrows to walk. Walk over rocks to grab them! 🪨",ti:0,tx:10,rf:null,tc:"",prob:{radio:0,gps:0,surge:0,dust:0},ev:[],fixp:0,nF:0,nE:0,sf:.5,inv:{},bf:{speed:0,shield:0},ch:pickCh(),bt:"pw",j:0};
+for(let i=0;i<70;i++)spawnRock();
+for(let s=60+Math.random()*20;s<H-35;s+=(90+Math.random()*30)/fq){G.fl.push(flareFor(s))}
+for(let s=40;s<H-10;s+=(75+Math.random()*20)/mq){const n=3+(Math.random()*3|0);for(let i=0;i<n;i++)G.mt.push({t:s+i*2.5,x:0,y:0})}
+if(!tt&&dy)G.last=en?"♾️ Endless trip! Open the base (B) and press End trip when you want to stop.":`📅 Day ${SEL.day}: build the ${dy.st}! Bank ${G.goal} ⭐ points in rocks.`;if(tut){G.fl=[];G.mt=[];G.ev=[];G.ch=[];G.rocks=[];G.dur=99999;G.tut={i:0,sx:G.x,sy:G.y,tg:null};tutGo(0)}else schedEv();beep(600,.15);ui()}
+function puff(x,y,c,n,v){for(let i=0;i<n;i++)G.pt.push({x,y,vx:(Math.random()-.5)*v,vy:-Math.random()*v*.8,l:.4+Math.random()*.3,c})}
+function grab(i){const k=G.rocks[i].k,t=T[k];G.carry.push(k);G.rocks.splice(i,1);let m=`Got ${t[0]} (${t[1]}) worth ${t[2]}!`;if(k==4){G.o2=Math.min(maxO2(),G.o2+25);m+=" +25 air from ice!"}if(!G.seen[k]){G.seen[k]=1;m+=" "+t[5]}G.last=m;beep(800,.08)}
+function blackout(w){G.carry=[];G.stun=6;G.nB++;G.x=1610;G.y=1070;G.o2=maxO2()*.6;G.hp=50;G.food=Math.max(G.food,30);G.exp=0;G.last=`💫 Oopsie! You fainted from ${w}! Your rover buddy dragged you home. You lost your bag and 6 seconds.`}
+function update(dt){if(G.ph!="play"||G.pause)return;G.t+=dt;G.at+=dt;G.shake=Math.max(0,G.shake-dt*20);G.flash=Math.max(0,G.flash-dt);G.brown=Math.max(0,G.brown-dt);if(G.t>=G.dur){endRun();return}
+G.pt=G.pt.filter(p=>(p.l-=dt)>0);G.pt.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt});
+if(G.stun>0){G.stun-=dt;hud();return}
+const ins=inB(G.x,G.y);G.door+=((ins||Math.hypot(G.x-1610,G.y-1060)<60?1:0)-G.door)*Math.min(1,6*dt);let fs=0,cls=null;
+G.fl.forEach((f,i)=>{if(G.t>=f.s&&!G.fb[i]){G.fb[i]=1;beep(440,.8)}if(G.t>=f.s&&G.t<f.s+15){fs=1;G.cd=Math.ceil(f.s+15-G.t);cls=CL[f.c];G.rf=f.real}else if(G.t>=f.s+15&&G.t<f.s+35){fs=2;cls=CL[f.c];G.rf=f.real}});G.fs=fs;G.cl=cls;
+const dx=(K.right|0)-(K.left|0),dy=(K.down|0)-(K.up|0),l=Math.hypot(dx,dy)||1,mv=dx||dy;G.mv=mv;if(dx)G.fx=dx>0?1:-1;
+if(G.wind&&G.stm>=25)G.wind=0;let spr=0;if(K.sprint&&mv&&!G.wind&&G.stm>0){spr=1;G.stm-=25*dt;G.srest=1;G.spT+=dt;if(G.stm<=0){G.stm=0;G.wind=1}}else{G.srest-=dt;if(G.srest<=0)G.stm=Math.max(0,Math.min(100,G.stm+(fs==2&&!ins&&cls&&cls[1]>=1?-5*cls[1]*G.d.dmg:15)*dt))}G.spr=spr;
+const sp=(spr?170:105)*(G.prob.dust>0?.85:1)*(G.bf.speed>0?1.25:1)*(G.food<20?.8:1)*(1-.6*G.exp/100)*(1-.025*G.carry.length);const ac=Math.min(1,(mv?3.5:2)*dt);G.vx+=((mv?dx/l*sp:0)-G.vx)*ac;G.vy+=((mv?dy/l*sp:0)-G.vy)*ac;G.x=clamp(G.x+G.vx*dt,10,WW-10);G.y=clamp(G.y+G.vy*dt,14,WH-10);G.food-=.35*G.d.fd*(ins?1:spr?2:1.5)*dt;
+if(mv)G.hph+=dt*(spr?6:3.6);else G.hph+=(Math.round(G.hph/Math.PI)*Math.PI-G.hph)*Math.min(1,8*dt);const nh=Math.floor(G.hph/Math.PI);if(nh>G.lh){G.lh=nh;puff(G.x-G.fx*6,G.y+19,"#d5d8e6",5,spr?70:45)}else if(nh<G.lh)G.lh=nh;
+if(ins){G.o2=Math.min(maxO2(),G.o2+.8*G.pw.l*pe()*(G.brown>0?.5:1)*dt);G.exp=Math.max(0,G.exp-12*dt);if(G.exp<10)G.hp=Math.min(100,G.hp+.8*dt);G.rp+=G.pw.g*pe()*(1+.3*L("garden")+(G.day>2?.3:0))*.002*dt;if(G.rp>=1){G.rp--;G.ration=Math.min(9,G.ration+1)}
+if(G.carry.length){let p=0;G.carry.forEach(k=>{p+=T[k][2];G.tally[k]++});G.score+=p;meta.cr+=p;save();G.last=`Banked ${G.carry.length} rocks: +${p} points and credits!`;G.carry=[]}
+if(K.eat&&G.food<=85&&G.ration>0){G.prog+=dt;if(G.prog>=3){G.prog=0;G.ration--;G.food=Math.min(100,G.food+25);G.last="Yum! +25 food"}}else G.prog=0;G.mr=null}
+else{G.o2-=(spr?3:2)*G.d.o2*dt;if(fs==2)G.exp=Math.min(100,G.exp+14*cls[1]*G.d.dmg*(G.bf.shield>0?.5:1)*(1-Math.min(.8,.04*G.pw.s*pe()))*(1-.2*L("lining"))*dt);else G.exp=Math.max(0,G.exp-2*dt);G.maxE=Math.max(G.maxE,G.exp);
+let mt=null;for(let i=G.rocks.length-1;i>=0;i--){if(G.carry.length>=cap())break;const r=G.rocks[i],m=T[r.k][4],d=Math.hypot(r.x-G.x,r.y-G.y);if(!m&&d<18)grab(i);else if(m&&d<34)mt=r}
+const nd=mt?T[mt.k][4]*(1-.25*L("drill"))*(G.prob.dust>0?2:1):0;if(mt&&K.mine){if(G.mr!==mt){G.mr=mt;G.prog=0}G.prog+=dt;G.pa-=dt;if(G.pa<=0){G.pa=.05;puff(mt.x,mt.y,"#ffd24a",2,90)}if(G.prog>=nd){grab(G.rocks.indexOf(mt));puff(G.x,G.y,"#fff",8,100);G.mr=null;G.prog=0}}else{G.mr=null;G.prog=0;if(mt)G.last=`Hold E to mine ${T[mt.k][0]} (${nd.toFixed(1)}s)`}}
+G.nd=G.mr?T[G.mr.k][4]*(1-.25*L("drill"))*(G.prob.dust>0?2:1):3;const q=G.rv,tx=G.x-G.fx*38,ty=G.y+12;q.a+=(Math.abs(tx-q.x)+Math.abs(ty-q.y))*dt*.4;q.fx=tx>q.x+2?1:tx<q.x-2?-1:q.fx;q.x+=(tx-q.x)*Math.min(1,3*dt);q.y+=(ty-q.y)*Math.min(1,3*dt);
+G.roff=(G.prob.radio>0||(fs==2&&cls&&cls[1]>=1&&G.pw.s<10))?1:0;q.off=G.roff;if(L("rover")&&!ins&&!G.roff)for(let i=G.rocks.length-1;i>=0;i--){const r=G.rocks[i];if(G.carry.length<cap()&&!T[r.k][4]&&Math.hypot(r.x-q.x,r.y-q.y)<30+30*L("rover"))grab(i)}
+if(G.exp>15)G.hp-=(G.exp-15)/100*7*dt;
+G.rocks=G.rocks.filter(r=>!r.life||(r.life-=dt)>0);G.sp-=dt;if(G.sp<0){G.sp=12;if(!G.tut)for(let i=0;i<6;i++)if(G.rocks.length<110)spawnRock()}
+G.mt.forEach(m=>{if(G.t>=m.t&&!m.x){const n=Math.random()<.5;m.x=n?clamp(G.x+(Math.random()-.5)*200,20,WW-20):30+Math.random()*(WW-60);m.y=n?clamp(G.y+(Math.random()-.5)*200,20,WH-20):30+Math.random()*(WH-60)}
+if(m.x&&!m.d&&G.t>=m.t+2.2){m.d=1;G.shake=meta.set.shk?8:0;beep(90,.25);puff(m.x,m.y,"#b5b8c9",14,160);if(Math.hypot(m.x-G.x,m.y-G.y)<44&&!ins){G.dmx=Math.round(22*G.d.dmg);G.hp-=G.dmx;G.flash=.4;G.last="☄️ Hit by an asteroid! −"+G.dmx+" health"}else if(inB(m.x,m.y)){G.brown=8;G.last="☄️ Base hit! Life support is at half power for 8s"}
+G.scars.push({x:m.x,y:m.y});const big=Math.random()<.25;G.rocks.push({x:m.x+14,y:m.y+8,k:big?[3,3,6,6,7,8][Math.random()*6|0]:5,life:20});if(big)G.last="☄️ Big asteroid! A rare rock fell. Grab it fast!"}});
+probTick(dt,ins);if(G.tut)tutTick();popTick(dt,ins);tipTick(dt,ins);if(G.o2<=0)blackout("no air");else if(G.food<=0)blackout("hunger");else if(G.hp<=0)blackout("radiation and damage");hud()}
+const used=()=>G.pw.l+G.pw.g+G.pw.s;
+function hud(){const set=(a,v,m)=>{$("#v"+a).textContent=Math.max(0,v|0);const e=$("#b"+a);e.style.width=Math.max(0,v)/m*100+"%";e.style.background=v/m<.25?"#ef4444":v/m<.5?"#f59e0b":"#4ade80"};
+if(!G.pw)return;set("o",G.o2,maxO2());set("f",G.food,100);set("h",G.hp,100);set("s",G.stm,100);const rem=(G.end?G.t:Math.max(0,G.dur-G.t))|0;$("#d").textContent=`⏱ ${rem/60|0}:${String(rem%60).padStart(2,"0")}${G.end?" ♾️":G.day?" · 📅 Day "+G.day:""} · ${ZN[zone(G.x,G.y)]}`;$("#c").textContent=`🎒 ${G.carry.length}/${cap()}${G.bf.speed>0?" 🏃":""}${G.bf.shield>0?" 🍅":""}`;
+$("#n").textContent=`🥫 ${G.ration} · 🍱 ${invN()} · ⚡ ${used()}/${effGen()} kW`;$("#ms").textContent=buildTxt()+(G.ch||[]).map(c=>`${c.done?"✅":"🎯"} ${c.t} ${Math.min(c.n,c.get())}/${c.n}`).join("  ·  ");$("#s").textContent=`⭐ ${G.score} · 💰 ${meta.cr}`;
+if(G.tut)$("#d").textContent="🎓 Tutorial";probHud();$("#r").textContent=G.fs==1?`⚠️ ${G.cl[0].toUpperCase()} SOLAR FLARE IN ${G.cd}s! Get inside!`:G.fs==2?"☢️ FLARE ACTIVE! Stay inside the base!":G.wind?"😮‍💨 Winded! Rest to sprint again.":G.last}
+function rr(c,x,y,w,h,r){c.beginPath();c.roundRect(x,y,w,h,r)}
+function astro(c,x,y,fx,t,mv,spr,mine,exp,hop){c.save();c.translate(x,y);c.scale(fx,1);if(spr)c.rotate(.12);else if(mv)c.rotate(.05);const w=mv?Math.sin(t):Math.sin(Date.now()/500)*.15,bob=mv?-(hop==null?Math.abs(Math.sin(t))*3:hop):Math.sin(Date.now()/500);
+c.fillStyle="rgba(0,0,0,.3)";c.beginPath();c.ellipse(0,21,14-(hop||0)*.3,4-(hop||0)*.1,0,0,7);c.fill();c.strokeStyle="#12192f";c.lineWidth=2;
+[-1,1].forEach(s=>{const lx=s*5+w*s*6,ly=bob+8-(mv?Math.max(0,Math.cos(t+(s>0?0:3.14)))*3:0);c.fillStyle=s>0?"#fff":"#cfd4e4";rr(c,lx-4,ly,8,11,3);c.fill();c.stroke();c.fillStyle="#3b4260";rr(c,lx-5,ly+9,11,6,3);c.fill();c.stroke()});
+c.fillStyle="#8d93a8";rr(c,-21,-10+bob,10,22,3);c.fill();c.stroke();c.strokeStyle="#6b7088";c.beginPath();c.moveTo(-12,-2+bob);c.lineTo(-6,-2+bob);c.stroke();c.strokeStyle="#12192f";
+c.fillStyle=exp>30?"#ffb3a8":"#fff";rr(c,-12,-9+bob,24,21,7);c.fill();c.stroke();c.fillStyle="#ff7a1a";c.fillRect(-11,3+bob,22,4);c.fillStyle="#2c3350";rr(c,-5,-4+bob,10,6,2);c.fill();c.fillStyle="#4ade80";c.fillRect(-3,-3+bob,3,3);c.fillStyle=(Date.now()/300|0)%2?"#f5b301":"#7a5a00";c.fillRect(1,-3+bob,3,3);
+c.fillStyle="#cfd4e4";c.save();c.translate(-8,-3+bob);c.rotate(w*.9);rr(c,-3,0,7,13,3);c.fill();c.stroke();c.restore();
+c.save();c.translate(8,-3+bob);if(mine){c.rotate(-1.25+Math.sin(Date.now()/60)*.25);c.fillStyle="#fff";rr(c,-3,0,7,12,3);c.fill();c.stroke();c.fillStyle="#6b7088";c.fillRect(-1,11,5,12);c.fillStyle="#ffd24a";c.fillRect(0,22,3,4)}else{c.rotate(-w*.9);c.fillStyle="#fff";rr(c,-3,0,7,13,3);c.fill();c.stroke()}c.restore();
+c.fillStyle="#fff";c.beginPath();c.arc(1,-17+bob,14,0,7);c.fill();c.stroke();c.fillStyle="#2a9df4";c.beginPath();c.ellipse(6,-17+bob,10,8,0,0,7);c.fill();c.stroke();c.fillStyle="#bfe6ff";c.beginPath();c.ellipse(3,-20+bob,4,2,-.4,0,7);c.fill();c.restore()}
+function base(c){const t=Date.now()/1000,pw=G.pw,fl=G.fs==1&&(t*3|0)%2,O="#12192f";c.lineWidth=2;
+c.fillStyle="#555a70";c.strokeStyle=O;c.beginPath();c.arc(1500,1135,46,0,7);c.fill();c.stroke();c.strokeStyle="#ffd24a";c.beginPath();c.arc(1500,1135,36,0,7);c.stroke();c.fillStyle="#ffd24a";c.fillRect(1494,1125,3,20);c.fillRect(1503,1125,3,20);c.fillRect(1494,1133,12,3);
+const n=2+L("gen");for(let i=0;i<n;i++){const px=1436-36*(i+1);c.fillStyle="#244a9a";c.strokeStyle=O;c.fillRect(px,1010,32,24);c.strokeRect(px,1010,32,24);c.strokeStyle="#6fa0ff";c.beginPath();c.moveTo(px+16,1010);c.lineTo(px+16,1034);c.moveTo(px,1022);c.lineTo(px+32,1022);c.stroke();c.fillStyle=`rgba(255,255,255,${.2+.2*Math.sin(t*2+i)})`;c.fillRect(px+2,1012,10,6)}
+c.strokeStyle="#6b7088";c.lineWidth=5;c.beginPath();c.moveTo(1520,1035);c.lineTo(1530,1035);c.moveTo(1690,1035);c.lineTo(1706,1035);c.stroke();c.lineWidth=2;c.strokeStyle=O;
+c.fillStyle="#7d84a0";rr(c,1440,985,80,75,8);c.fill();c.stroke();c.fillStyle=`rgba(255,200,60,${.4+.5*(.5+.5*Math.sin(t*4))})`;c.beginPath();c.arc(1480,1030,14,0,7);c.fill();c.stroke();c.fillStyle="#3b4260";c.fillRect(1448,995,24,8);c.fillRect(1448,1006,24,8);
+const sg=pw.s/25;c.fillStyle="#9aa1ba";c.fillRect(1476,935,8,52);c.strokeRect(1476,935,8,52);for(let i=0;i<3;i++){c.strokeStyle=`rgba(80,220,255,${.25+.7*sg})`;c.lineWidth=2+sg*2;c.beginPath();c.ellipse(1480,930,10+i*7+(G.fs==2?Math.sin(t*6+i)*3:0),5+i*3,0,0,7);c.stroke()}c.lineWidth=2;c.strokeStyle=O;
+let g=c.createLinearGradient(0,960,0,1060);g.addColorStop(0,"#f2f4fa");g.addColorStop(1,"#a9b0c6");c.fillStyle=g;rr(c,1530,960,160,100,14);c.fill();c.stroke();c.strokeStyle="#c3c9dc";c.beginPath();c.moveTo(1530,975);c.lineTo(1690,975);c.stroke();c.strokeStyle=O;
+for(let i=0;i<3;i++){c.fillStyle=fl?"#ff9a3c":"#ffd86b";rr(c,1544+i*38,990,28,16,4);c.fill();c.stroke()}
+c.fillStyle="#1d2238";rr(c,1595,1015,30,45,3);c.fill();c.stroke();c.fillStyle="#8d96b4";const dw=15*(1-G.door);c.fillRect(1595,1015,dw,45);c.fillRect(1625-dw,1015,dw,45);
+c.save();c.translate(1660,956);c.strokeStyle=O;c.beginPath();c.moveTo(0,0);c.lineTo(0,-12);c.stroke();c.rotate(Math.sin(t)*.5);c.fillStyle="#e8ebf5";c.beginPath();c.ellipse(0,-14,16,6,0,0,7);c.fill();c.stroke();c.restore();c.fillStyle=(t*2|0)%2?"#ff4d4d":"#7a2020";c.beginPath();c.arc(1540,960,3,0,7);c.fill();
+const gg=pw.g/25;c.fillStyle=`rgba(150,235,160,${.3+.3*gg})`;c.beginPath();c.ellipse(1736,1030,36,40,0,Math.PI,0);c.lineTo(1772,1070);c.lineTo(1700,1070);c.fill();c.strokeStyle="#cdeccf";c.stroke();
+for(let i=0;i<5;i++){const px=1710+i*12,h=8+gg*14+(i%2)*4;c.save();c.translate(px,1068);c.rotate(Math.sin(t*1.5+i)*.15*gg);c.fillStyle="#3d9a4e";c.fillRect(-2,-h,4,h);c.fillStyle="#7fe08c";c.fillRect(-6,-h,12,4);c.restore()}}
+function rover(c,q){c.save();c.translate(q.x,q.y+Math.sin(q.a*.5)*.8);if(q.off){c.fillStyle="#ef4444";c.font="bold 11px sans-serif";c.textAlign="center";c.fillText("OFFLINE",0,-26)}c.scale(q.fx,1);c.strokeStyle="#12192f";c.lineWidth=2;c.fillStyle="#f5b301";rr(c,-14,-9,28,12,3);c.fill();c.stroke();c.fillStyle="#38bdf8";rr(c,1,-16,12,8,2);c.fill();c.stroke();
+[-9,9].forEach(x=>{c.fillStyle="#2a2e44";c.beginPath();c.arc(x,5,5,0,7);c.fill();c.stroke();c.strokeStyle="#aab";c.beginPath();c.moveTo(x,5);c.lineTo(x+Math.cos(q.a)*4,5+Math.sin(q.a)*4);c.stroke();c.strokeStyle="#12192f"});
+c.beginPath();c.moveTo(-10,-9);c.lineTo(-10,-17);c.stroke();c.fillStyle=(Date.now()/300|0)%2?"#4ade80":"#14532d";c.fillRect(-12,-20,4,4);c.restore()}
+function draw(){const c=cx;if(!G.rocks)return;const ox=clamp(G.x-VW/2,0,WW-VW)+(Math.random()-.5)*G.shake,oy=clamp(G.y-VH/2,0,WH-VH)+(Math.random()-.5)*G.shake;
+c.setTransform(1,0,0,1,0,0);c.drawImage(bg,-ox,-oy);c.translate(-ox,-oy);c.lineWidth=2;
+G.scars.forEach(s=>{c.fillStyle="rgba(20,20,35,.45)";c.beginPath();c.ellipse(s.x,s.y,22,15,0,0,7);c.fill()});
+c.fillStyle="rgba(0,0,0,.28)";c.fillRect(1430,1050,350,20);base(c);site(c);
+G.rocks.forEach(r=>{if(Math.abs(r.x-G.x)>480||Math.abs(r.y-G.y)>300)return;const t=T[r.k],s=5+r.k*1.1;c.save();c.shadowColor=t[3];c.shadowBlur=r.k>2?14:0;c.fillStyle=t[3];c.strokeStyle="#161a2c";c.beginPath();for(let i=0;i<6;i++){const a=i*1.047+r.x;c.lineTo(r.x+Math.cos(a)*s*(i%2?1:.85),r.y+Math.sin(a)*s*.8)}c.closePath();c.fill();c.stroke();c.restore();c.fillStyle="#fff8";c.fillRect(r.x-3,r.y-3,3,2);
+if(r.life){c.strokeStyle="#ffd24a";c.beginPath();c.arc(r.x,r.y,s+6,-1.57,-1.57+6.28*r.life/20);c.stroke()}});
+G.mt.forEach(m=>{if(m.x&&!m.d){const k=(G.t-m.t)/2.2;c.strokeStyle="rgba(255,60,60,.9)";c.beginPath();c.arc(m.x,m.y,44*k,0,7);c.stroke();c.fillStyle="rgba(255,60,60,.2)";c.beginPath();c.arc(m.x,m.y,44,0,7);c.fill()}});
+rover(c,G.rv);G.pt.forEach(p=>{c.fillStyle=p.c;c.globalAlpha=Math.min(1,p.l*2.5);c.fillRect(p.x,p.y,4,4)});c.globalAlpha=1;
+astro(c,G.x,G.y,G.fx,G.hph,G.mv||Math.abs(G.vx)>12||Math.abs(G.vy)>12,G.spr,G.mr&&K.mine,G.exp,Math.abs(Math.sin(G.hph))*(G.spr?20:13));
+if(G.prog>0){const nd=G.mr?G.nd:3;c.fillStyle="#000a";c.fillRect(G.x-20,G.y-48,40,7);c.fillStyle="#f5b301";c.fillRect(G.x-20,G.y-48,40*Math.min(1,G.prog/nd),7)}
+if(G.fixp>0){c.fillStyle="#000a";c.fillRect(G.x-20,G.y-60,40,7);c.fillStyle="#4ade80";c.fillRect(G.x-20,G.y-60,40*Math.min(1,G.fixp/3),7)}
+c.setTransform(1,0,0,1,0,0);
+pointers(c,ox,oy);drawPops(c);if(G.fs==2){c.fillStyle=`rgba(255,110,0,${.14+.06*Math.sin(Date.now()/150)})`;c.fillRect(0,0,VW,VH)}
+if(G.flash>0){c.fillStyle=`rgba(255,0,0,${G.flash})`;c.fillRect(0,0,VW,VH)}
+if(G.prob.dust>0){c.fillStyle="rgba(170,125,70,.24)";c.fillRect(0,0,VW,VH)}
+if(G.prob.surge>0){const au=c.createLinearGradient(0,0,0,150);au.addColorStop(0,`rgba(80,255,170,${.22+.1*Math.sin(Date.now()/400)})`);au.addColorStop(.6,"rgba(170,90,255,.1)");au.addColorStop(1,"rgba(0,0,0,0)");c.fillStyle=au;c.fillRect(0,0,VW,150)}
+if(G.prob.surge>0&&(Date.now()/180|0)%6==0){c.fillStyle="rgba(0,0,0,.4)";c.fillRect(0,0,VW,VH)}
+if(G.stun>0){c.fillStyle="rgba(0,0,0,.7)";c.fillRect(0,0,VW,VH)}
+const bl=(Date.now()/250|0)%2,soon=G.mt.some(m=>m.x&&!m.d);c.font="bold 17px sans-serif";c.textAlign="center";
+if(G.fs==1){c.fillStyle=bl?"#f5b301":"#ffd966";c.fillRect(100,10,600,48);c.fillStyle="#161a3a";c.font="bold 17px sans-serif";c.fillText(`⚠ ${G.cl[0].toUpperCase()} SOLAR FLARE IN ${G.cd}s – RUN TO THE BASE!`,400,30);c.font="bold 12px sans-serif";c.fillText(G.rf?`📡 Real NASA DONKI flare: ${flInfo(G.rf)}`:"📡 Practice flare (NASA data not loaded)",400,50);c.font="bold 17px sans-serif"}
+else if(G.fs==2){c.fillStyle="#b42318";c.fillRect(100,10,600,30);c.fillStyle="#fff";c.fillText("☢ FLARE ACTIVE – STAY INSIDE!",400,31)}
+if(soon&&G.fs!=1){c.fillStyle="#ef4444";c.fillRect(100,44,600,28);c.fillStyle="#fff";c.fillText("☄ ASTEROID INCOMING – LEAVE THE RED CIRCLE!",400,64)}
+c.textAlign="left";const mx=VW-136,my=VH-88,k=.04;c.fillStyle="rgba(10,12,30,.65)";c.fillRect(mx,my,128,80);if(G.prob.radio>0){c.fillStyle="#fff";for(let i=0;i<50;i++)c.fillRect(mx+Math.random()*124,my+Math.random()*76,3,2);c.fillStyle="#000b";c.fillRect(mx+14,my+32,100,18);c.fillStyle="#fff";c.font="bold 12px sans-serif";c.textAlign="center";c.fillText("📻 STATIC!",mx+64,my+45);c.textAlign="left"}
+else{const gp=G.prob.gps>0,jx=gp?Math.sin(Date.now()/230)*380:0,jy=gp?Math.cos(Date.now()/310)*260:0;if(!gp){c.fillStyle="#fff";c.fillRect(mx+Z.x*k,my+Z.y*k,Z.w*k,Z.h*k)}
+G.rocks.forEach(r=>{c.fillStyle=T[r.k][3];c.fillRect(mx+r.x*k,my+r.y*k,2,2)});c.fillStyle="#38bdf8";c.fillRect(mx+(G.x+jx)*k-2,my+(G.y+jy)*k-2,5,5);if(gp){c.fillStyle="#fff";c.font="bold 11px sans-serif";c.fillText("🛰️ ???",mx+4,my+12)}}}
+function adj(k,d){const v=G.pw[k]+d*5;if(v<0||v>25||(d>0&&used()+5>gen()))return;G.pw[k]=v;ui()}
+function buy(id){const l=L(id),c=COST[l];if(l>=3||meta.cr<c)return;meta.cr-=c;meta.lv[id]=(meta.lv[id]|0)+1;save();ui()}
+function shop(){return `<h2>🔧 Upgrades · 💰 ${meta.cr} credits</h2><div class="two">${U.map(u=>{const l=L(u[0]),c=COST[l];return `<div class="row" style="display:block"><b>${u[1]}</b> Lv ${l}/3<small>${u[2]}</small><button ${l>=3||meta.cr<c?"disabled":""} onclick="buy('${u[0]}')">${l>=3?"MAX":"Buy "+c}</button></div>`}).join("")}</div>`}
+const stp=(k,n,h)=>`<div class="row"><div>${n}<small>${h}</small></div><button class="st" onclick="adj('${k}',-1)" aria-label="less ${n}">−</button><b>${G.pw[k]} kW</b><button class="st" onclick="adj('${k}',1)" aria-label="more ${n}">+</button></div>`;
+const grade=s=>{s/=(G.end?Math.max(60,G.t):G.dur)/300;return s>=450?"S":s>=320?"A":s>=200?"B":s>=110?"C":"D"};
+function lessons(){const a=[],t=G.tally,b=t.reduce((m,v,i)=>v&&(m<0||T[i][2]>T[m][2])?i:m,-1),rf=G.fl.filter(f=>f.real&&G.t>=f.s);
+if(rf.length)a.push(`📡 Real NASA flares were in your game! You hid from ${rf.slice(0,3).map(f=>f.real.cls+" ("+fmtD(f.real.t)+")").join(", ")}. NASA watches the Sun every day to keep astronauts safe! ☀️`);
+if(b>=0)a.push(`⭐ Best find: ${T[b][0]}! ${T[b][5]}`);
+if(G.spT>15)a.push(`💨 You zoomed for ${G.spT|0} seconds! Zooming uses up air fast, so astronauts walk most of the time. 🚶`);
+if(G.nB)a.push(`💫 You fainted ${G.nB} time${G.nB>1?"s":""}. Real astronauts always keep extra air so they can get home! 🏠`);
+if(G.pw.s>=15&&G.pw.g<=5)a.push("🛡️ You gave lots of power to the shield, so the garden got sleepy 🥬. Engineers always have to share power!");else if(G.pw.s<=5&&G.maxE>50)a.push("☢️ The shield was too sleepy, so sun-rays sneaked in! Shields need power to work. 🔋");
+if(G.nF)a.push(`🔧 You fixed ${G.nF} problem${G.nF>1?"s":""}! Real engineers get alerts from space-weather forecasters and then fix or wait out problems, just like you!`);
+a.push("🤝 Real space teams share power, air, food and safety just like you did!");return a.slice(0,5)}
+function openBase(){if(G.ph=="play"&&inB(G.x,G.y)&&!G.pause){G.pause=true;ui()}}
+function closeBase(){G.pause=false;ui()}
+function ui(){const o=$("#ov"),pl=G.ph=="play"&&!G.pause;$("#ctl").style.display=G.ph=="play"?"flex":"none";cv.style.display=pl?"block":"none";hud();$("#tip").hidden=!(pl&&(meta.set.tip||G.tut));$("#mc").style.display=G.ph=="menu"?"block":"none";o.className=G.ph=="menu"?"menu":"";document.querySelectorAll(".hud,.info").forEach(e=>e.style.display=G.ph=="play"?"":"none");if(pl){o.hidden=true;return}o.hidden=false;
+if(G.ph=="menu")o.innerHTML=menuHTML();
+else if(G.pause)o.innerHTML=baseHTML();
+else if(G.endScr)o.innerHTML=endingHTML(0);else{const g=grade(G.score);o.innerHTML=dayBanner()+`<p class="big">${g}</p>${G.nb?'<h2 style="text-align:center;color:#ffd24a">🎉 NEW RECORD! 🏆</h2>':""}<h2 style="text-align:center">🚀 The rescue shuttle came!</h2><p style="text-align:center">⭐ ${G.score} points banked<br>${T.map((t,i)=>G.tally[i]?`<span style="color:${t[3]}">■</span> ${t[0]} ×${G.tally[i]}`:"").filter(Boolean).join(" · ")||"No rocks banked"}</p>${missionsHTML()}<h2>🎓 Space school!</h2><ul>${lessons().map(x=>`<li>${x}</li>`).join("")}</ul>${shop()}${endBtns()}<button onclick="if(confirm('Erase all upgrades?')){meta=defMeta();save();ui()}">Reset progress</button>`}}
+const KM={ArrowUp:"up",KeyW:"up",ArrowDown:"down",KeyS:"down",ArrowLeft:"left",KeyA:"left",ArrowRight:"right",KeyD:"right",KeyE:"mine",KeyF:"eat",KeyR:"fix",KeyQ:"snack",ShiftLeft:"sprint",ShiftRight:"sprint"};
+addEventListener("keydown",e=>{if(/^Digit[1-9]$/.test(e.code)&&G.ph=="play"&&!G.pause&&FOODS[+e.code.slice(5)-1])eatFood(FOODS[+e.code.slice(5)-1].id);if(e.code=="KeyB"){G.pause?closeBase():openBase();return}if(e.code=="Escape"&&G.pause)closeBase();const m=KM[e.code];if(m&&G.ph=="play"){K[m]=1;e.preventDefault()}});addEventListener("keyup",e=>{const m=KM[e.code];if(m)K[m]=0});addEventListener("blur",()=>K={});
+document.querySelectorAll("#ctl button[data-k]").forEach(b=>{const k=b.dataset.k;b.addEventListener("pointerdown",e=>{e.preventDefault();K[k]=1});["pointerup","pointerleave","pointercancel"].forEach(v=>b.addEventListener(v,()=>K[k]=0))});
+$("#bb").addEventListener("click",()=>{G.pause?closeBase():openBase()});
+
+/* ===== NASA DONKI data ===== */
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtD=s=>{const d=new Date(s);if(isNaN(d))return"?";const o={month:"short",day:"numeric"};if(d.getFullYear()!=new Date().getFullYear())o.year="numeric";return d.toLocaleDateString(undefined,o)};
+const ymd=d=>d.toISOString().slice(0,10);
+const SAMPLE=[{cls:"M2.3",t:"2016-01-02T00:11Z",loc:"S21W73"},{cls:"M5.2",t:"2014-05-08T10:07Z",loc:"N05E55"},{cls:"M1.8",t:"2014-05-06T09:03Z",loc:"S13W87"},{cls:"M1.0",t:"2014-05-06T22:09Z",loc:"S09W91"},{cls:"C9.6",t:"2016-01-28T12:02Z",loc:"N03W47"}];
+const NS={st:"sample",flares:SAMPLE,cmes:0,fast:0,gst:[],sep:0,at:0,busy:false,i:Math.random()*50|0};
+try{const s=JSON.parse(localStorage.getItem("moonOutpostNasa"));if(s&&Array.isArray(s.fl)){NS.flares=s.fl;NS.cmes=s.cm||0;NS.fast=s.fast||0;NS.gst=s.gst||[];NS.sep=s.sep||0;NS.at=s.at||0;NS.st="cache"}}catch(e){}
+const gj=async u=>{const r=await fetch(u,{signal:AbortSignal.timeout?AbortSignal.timeout(9000):undefined});if(!r.ok)throw 0;return r.json()};
+async function loadNasa(){if(NS.busy)return;NS.busy=true;nasaRefresh();const e=new Date(),q=`startDate=${ymd(new Date(e-29*864e5))}&endDate=${ymd(e)}`;
+for(const [b,k] of [["https://ccmc.gsfc.nasa.gov/DONKI-API/get/",""],["https://api.nasa.gov/DONKI/","&api_key=DEMO_KEY"]]){try{
+const [f,c,gs,sp]=await Promise.all([gj(`${b}FLR?${q}${k}`),gj(`${b}CME?${q}${k}`).catch(()=>[]),gj(`${b}GST?${q}${k}`).catch(()=>[]),gj(`${b}SEP?${q}${k}`).catch(()=>[])]);if(!Array.isArray(f))throw 0;
+const fl=f.map(x=>({cls:String(x.classType||""),t:x.peakTime||x.beginTime||"",loc:x.sourceLocation||"?",id:x.flrID||"",ar:x.activeRegionNum||0})).filter(x=>/^[CMX]\d/.test(x.cls)).sort((a,b)=>new Date(b.t)-new Date(a.t));
+let fast=0;const cm=Array.isArray(c)?c:[];cm.forEach(m=>(m.cmeAnalyses||[]).forEach(a=>{if(a.speed>fast)fast=a.speed}));
+const gst=(Array.isArray(gs)?gs:[]).map(x=>({t:x.startTime||"",kp:Math.max(0,...(x.allKpIndex||[]).map(z=>+z.kpIndex||0))})).filter(x=>x.kp>=4).sort((a,b)=>new Date(b.t)-new Date(a.t));
+NS.flares=fl;NS.cmes=cm.length;NS.fast=Math.round(fast);NS.gst=gst;NS.sep=Array.isArray(sp)?sp.length:0;NS.at=Date.now();NS.st="live";
+try{localStorage.setItem("moonOutpostNasa",JSON.stringify({fl,cm:NS.cmes,fast:NS.fast,gst,sep:NS.sep,at:NS.at}))}catch(_){}
+break}catch(_){}}
+NS.busy=false;nasaRefresh()}
+function nasaRefresh(){sideLive();if(G.ph=="menu")ui()}
+const pool=()=>{const p=NS.flares.filter(f=>/^[MX]/.test(f.cls));return p.length>=3?p:NS.flares};
+function flareFor(s){const mx=G.cfg?G.cfg.mx:2,ok=f=>"CMX".indexOf(f.cls[0])<=mx;let p=pool().filter(ok);if(!p.length)p=NS.flares.filter(ok);if(p.length){const f=p[(NS.i++)%p.length];return{s,c:"CMX".indexOf(f.cls[0]),real:f}}const r=Math.random();return{s,c:Math.min(mx,r<.45?0:r<.85?1:2)}}
+function mood(){if(NS.busy)return{e:"☎️",t:"Calling NASA…"};if(NS.st=="sample")return{e:"🤔",t:"I can't reach NASA right now, so here are old examples!"};
+const w=Date.now()-7*864e5,r=NS.flares.filter(f=>new Date(f.t)>w),x=r.filter(f=>f.cls[0]=="X").length,m=r.filter(f=>f.cls[0]=="M").length;
+return x?{e:"🤩",t:`The Sun is SUPER excited! ${x} giant flare${x>1?"s":""} this week!`}:m>1?{e:"😃",t:`The Sun is playful! ${m} medium flares this week.`}:{e:"😴",t:"The Sun is sleepy this week. Only tiny flares!"}}
+
+/* ===== tips ===== */
+const TIPS=["🌬️ The Moon has NO air! That's why astronauts carry their own air tank. 💨","🦘 Moon gravity is much weaker, so astronauts bounce and hop like bunnies!","🧊 NASA found frozen water ice hiding in dark Moon craters. Grab 🧊 Water Ice to get extra air!","🏠 Go back to the base to fill your air, rest and bank your rocks!","🎒 Your bag only holds a few rocks. Bank them in the base to make room!","⛏ Shiny glowing rocks are rare! Hold E next to them to dig them up.","☄️ Space rocks hit the Moon all the time because it has no air to stop them!","☀️ The Sun sometimes sneezes out a flare. NASA watches it with special telescopes. 🔭","🛡️ In the base panel (press B) you can share power between air, food and the flare shield.","👣 Footprints on the Moon can stay for a very, very long time because there is no wind!","🌍 The Moon is slowly floating away from Earth, about as fast as your fingernails grow!","🌞 One day on the Moon lasts about 29 Earth days. That's a LONG day!","🥬 Greenhouse power grows food rations 🥫. Eat with F inside the base!","💨 Zooming (Shift) is fast but uses lots of air. Walk when you can!","🥶 The Moon is super hot in the sunshine and super cold in the shadows!","🧑‍🚀 NASA's Artemis missions want to bring astronauts back to the Moon!"];
+function tipTick(dt,ins){G.tx-=dt;let c=null;if(G.tut){const s=TUT[G.tut.i],el=$("#tt"),t=`🎓 ${G.tut.i+1}/${TUT.length}: ${s.t}`;if(el.textContent!==t)el.textContent=t;$("#tip").classList.add("tut");$("#tn").hidden=!s.man;$("#tn").textContent=s.last?"Finish 🎉":"Next ➜";$("#tk").hidden=false;return}$("#tip").classList.remove("tut");$("#tn").hidden=true;$("#tk").hidden=true;
+if(G.fs==1)c=G.rf?`📡 REAL NASA DONKI flare: ${flInfo(G.rf)}. The Sun is sneezing ☀️🤧 RUN INSIDE! ${FLFX[G.cl?"CMX".indexOf(G.cl[0][0]):0]}`:"☀️🤧 The Sun is about to sneeze! Run into the base!";
+else if(G.fs==2&&!ins)c="☢️ Sun-rays! Get in the base NOW! Sun particles (SEP) drain your stamina outside! 🏠";
+else if(probTip())c=probTip();
+else if(G.mt.some(m=>m.x&&!m.d))c="☄️ Space rock coming! Step out of the red circle!";
+else if(G.o2<30&&!ins)c="💨 Your air is getting low! Go home 🏠 or grab 🧊 Water Ice!";
+else if(G.food<25)c="🍎 Tummy rumble! Stand in the base and hold F to eat!";
+else if(G.wind)c="😮‍💨 Puff puff! Rest a moment, then you can zoom again!";
+else if(G.carry.length>=cap())c="🎒 Your bag is full! Walk to the base to bank your rocks!";
+if(!c&&G.tx<=0){G.ti=(G.ti+1)%TIPS.length;G.tg=TIPS[G.ti];G.tx=11}
+const t=c||G.tg,el=$("#tt");if(el.textContent!==t)el.textContent=t}
+
+/* ===== records ===== */
+function finish(){const r=meta.rec,g=grade(G.score),R="DCBAS",k="b"+G.dur;r.runs++;r.pts+=G.score;r.rocks+=G.tally.reduce((a,b)=>a+b,0);r.opals+=G.tally[8];r.blk+=G.nB;r.fix+=G.nF;r.mis+=G.ch.filter(c=>c.done).length;G.tally.forEach((v,i)=>r.tl[i]=(r.tl[i]||0)+v);
+G.nb=0;if(G.end){if(G.score>(r.eb||0)){G.nb=1;r.eb=G.score}r.et=Math.max(r.et||0,G.t|0)}else{if(G.score>(r[k]||0)){G.nb=1;r[k]=G.score}}if(r.gr=="-"||R.indexOf(g)>R.indexOf(r.gr))r.gr=g;G.win=0;if(G.goal){G.win=G.score>=G.goal?1:0;if(G.win){const c=meta.camp,i=G.day-1;c.done[i]=1;c.best[i]=Math.max(c.best[i]||0,G.score);if(G.day==3){c.fin=1;G.endScr=1}}}save()}
+
+/* ===== menu screens ===== */
+const mb=(c,t,f,x="")=>`<button class="mb ${c}" ${x} onclick="${f}">${t}</button>`;
+const BACK=`<button class="mb y bk" onclick="nav('home')">⬅ Back</button>`;
+function nav(s){MS=s;ui();beep(520,.07)}
+function tog(k){meta.set[k]=+!meta.set[k];save();beep(660,.06);ui()}
+function tickerText(){return `📡 NASA ${NS.busy?"is being called ☎️":NS.st=="live"?"LIVE":NS.st=="cache"?"(saved copy)":"(old examples)"}: ${mood().e} ${mood().t}   ✨   Tip: ${TIPS[(Date.now()/20000|0)%TIPS.length]}`}
+const fr=f=>"CMX".indexOf(f.cls[0])*100+(parseFloat(f.cls.slice(1))||0);
+function bookRow(t,i){const n=meta.rec.tl[i]||0;return n?`<div class="row"><div><b><span style="color:${t[3]};-webkit-text-stroke:1px #14123a">■</span> ${t[0]}</b> <span class="chip">${t[1]} · ${t[2]} pts</span><small>${t[5]}</small></div><b>×${n}</b></div>`:`<div class="row"><div><b>❓ ???</b><small>Find this rock to learn its secret!</small></div></div>`}
+function menuHTML(){const s=MS,r=meta.rec;
+if(s=="play")return diffHTML();if(s=="school")return schoolHTML();if(s=="len")return lenHTML();if(s=="day")return dayHTML();if(s=="ending")return endingHTML(1);if(s=="play0")return `<div class="mwrap"><h2 class="mh">🚀 Pick your trip!</h2><div class="panel"><p>Dig up shiny rocks 🪨, hide from the Sun's sneezes ☀️🤧 and dodge space rocks ☄️!</p><p>📡 Real flares from NASA will show up in your game!</p></div>${mb("g","🐣 Quick Trip<small>5 minutes</small>","begin(300)")}${mb("o","🦖 Long Trip<small>10 minutes</small>","begin(600)")}${BACK}</div>`;
+if(s=="set"){const row=(k,e,n,h)=>`<div class="row"><div>${e} ${n}<small>${h}</small></div><button class="tg ${meta.set[k]?"on":""}" onclick="tog('${k}')" aria-pressed="${!!meta.set[k]}">${meta.set[k]?"ON":"OFF"}</button></div>`;
+return `<div class="mwrap"><h2 class="mh">⚙️ Settings</h2><div class="panel">${row("snd","🔊","Sounds","Beeps and boops")}${row("shk","📳","Shaky screen","When space rocks go BOOM")}${row("tip","💡","Helper tips","A friend gives tips while you play")}<div class="row"><div>📡 NASA news<small>${esc(NS.busy?"Calling NASA…":NS.st=="live"?"Live right now!":NS.st=="cache"?"Using a saved copy":"Using old examples")}</small></div><button class="tg on" ${NS.busy?"disabled":""} onclick="loadNasa()">🔄</button></div><div class="row"><div>🗑️ Start over<small>Erase upgrades and records</small></div><button class="tg" onclick="if(confirm('Erase everything?')){meta=defMeta();save();ui()}">Erase</button></div></div>${BACK}</div>`}
+if(s=="rec"){const c=(e,n,v)=>`<div class="rc"><span>${e}</span><b>${v}</b><small>${n}</small></div>`;
+return `<div class="mwrap"><h2 class="mh">🏆 My Records</h2><div class="rg">${c("🐣","Best 5 minute score",r.b300)}${c("🦖","Best 10 minute score",r.b600)}${c("🎖️","Best grade",r.gr)}${c("🚀","Trips finished",r.runs)}${c("🪨","Rocks banked",r.rocks)}${c("⭐","Total points",r.pts)}${c("🌈","Moon Opals found",r.opals)}${c("💫","Faint spells",r.blk)}${c("🔧","Problems fixed",r.fix)}${c("🎯","Missions done",r.mis)}${c("♾️","Best endless score",r.eb||0)}${c("🏗️","Outpost stages built",meta.camp.done.reduce((a,b)=>a+b,0)+"/3")}</div>${BACK}</div>`}
+if(s=="shop")return `<div class="mwrap"><h2 class="mh">🛒 Space Shop</h2><div class="panel">${shop()}</div>${BACK}</div>`;
+if(s=="book")return `<div class="mwrap"><h2 class="mh">📖 Rock Book</h2><div class="panel">${T.map(bookRow).join("")}</div>${BACK}</div>`;
+if(s=="nasa"){const m=mood(),top=NS.flares.slice().sort((a,b)=>fr(b)-fr(a)).slice(0,6),I={C:"🐣",M:"🐯",X:"🦖"},W={C:"little",M:"medium",X:"GIANT"};
+const st=NS.busy?"☎️ Calling NASA…":NS.st=="live"?"🟢 LIVE from NASA":NS.st=="cache"?"💾 Saved copy from last time":"📼 Old examples (couldn't reach NASA)";
+return `<div class="mwrap"><h2 class="mh">📡 NASA News</h2><div class="panel"><span class="chip">${st}</span><p class="mood">${m.e}</p><p style="text-align:center"><b>${esc(m.t)}</b></p><p>☀️ A <b>solar flare</b> is a flash of light when the Sun sneezes! NASA watches them so astronauts stay safe.</p><p>🐣 C = little · 🐯 M = medium · 🦖 X = GIANT</p></div><div class="panel"><h2>${NS.st=="sample"?"📼 Old NASA flares":"🔥 Biggest flares this month"}</h2>${top.length?top.map(f=>`<div class="row"><div>${I[f.cls[0]]} <b>${esc(f.cls)}</b> · ${fmtD(f.t)}<small>${W[f.cls[0]]} flare · spot on the Sun: ${esc(f.loc)}${f.ar?` · region ${esc(f.ar)}`:""}${f.id?` · ${esc(f.id)}`:""}${rScale(f.cls)?` · radio blackout level R${rScale(f.cls)}`:""}</small></div></div>`).join(""):"<p>😴 No flares at all! The Sun is napping.</p>"}${NS.st!="sample"&&NS.cmes?`<div class="row"><div>🌪️ <b>${NS.cmes}</b> Sun-burps (CMEs) this month<small>A CME is a giant bubble of Sun stuff zooming into space. Fastest: about ${NS.fast} km/s 🏎️</small></div></div>`:""}${NS.st!="sample"&&(NS.gst.length||NS.sep)?`<div class="row"><div>🌩️ <b>${NS.gst.length}</b> magnet storms · ☢️ <b>${NS.sep}</b> particle storms<small>Real counts from NASA this month. Strongest magnet storm: Kp ${NS.gst.reduce((m,g)=>Math.max(m,g.kp),0)}</small></div></div>`:""}<p class="sm">Data: NASA DONKI (ccmc.gsfc.nasa.gov). These flares and storms appear in your game!</p></div><button class="mb c bk" ${NS.busy?"disabled":""} onclick="loadNasa()">🔄 Ask NASA again</button>${BACK}</div>`}
+return `<div class="mwrap"><div class="logo"><span class="mo">🌙</span><h1>MOON<br>OUTPOST</h1><p>🚀 Hi, Space Explorer! 🌟</p></div><div class="mbs">${mb("g","▶ PLAY","nav('play')")}${mb("c","🎓 TUTORIAL<small>Learn how to play!</small>","askTut()")}${mb("b","⚙️ SETTINGS","nav('set')")}${mb("o","📚 SPACE SCHOOL<small>Learn, super easy facts and quizzes</small>","SCH.sec='home';nav('school')")}${meta.camp.fin?mb("p","🎬 Watch the Ending","nav('ending')"):""}</div><div class="mini">${mb("p","🛒 Shop","nav('shop')")}${mb("c","📡 NASA News","nav('nasa')")}${mb("y","📖 Rock Book","nav('book')")}${mb("y","🏆 Records","nav('rec')")}</div><div class="tick"><span>${esc(tickerText())}</span></div></div>`}
+
+/* ===== animated menu scene ===== */
+const mc=$("#mc"),mx=mc.getContext("2d"),DK="#14123a",PC=["#ffe14d","#ff9ce6","#9ff3ff","#b9ff7a"];
+const MST=Array.from({length:150},()=>({x:Math.random(),y:Math.random(),r:.6+Math.random()*1.8,p:Math.random()*6,s:.004+Math.random()*.012,c:["#fff","#ffe14d","#9ff3ff","#ff9ce6"][Math.random()*4|0]}));
+const FST=Array.from({length:16},()=>({x:Math.random(),y:Math.random()*.7,s:7+Math.random()*13,v:(.02+Math.random()*.05)*(Math.random()<.5?-1:1),r:Math.random()*6,c:PC[Math.random()*4|0]}));
+const mkAst=init=>({x:init?Math.random():1.12+Math.random()*.1,y:.04+Math.random()*.62,s:18+Math.random()*34,v:.012+Math.random()*.03,vy:(Math.random()-.3)*.01,r:Math.random()*6,w:(Math.random()-.5)*1.6,pts:Array.from({length:9},()=>.75+Math.random()*.5),c:["#a78bfa","#fb923c","#94a3b8","#f472b6","#34d399"][Math.random()*5|0],face:Math.random()<.6});
+const mkCom=()=>({x:.5+Math.random()*.6,y:-.1+Math.random()*.4,vx:-(.25+Math.random()*.25),vy:.12+Math.random()*.16,c:PC[Math.random()*4|0],s:4+Math.random()*5});
+let MA=Array.from({length:10},()=>mkAst(1)),MC=[mkCom(),mkCom()],mcT=0,mlt=0;
+const CRT=[[.16,.9,.05],[.42,.87,.035],[.7,.93,.06],[.9,.9,.04],[.3,.96,.04],[.56,.95,.05]];
+function pstar(c,x,y,r,rot){c.beginPath();for(let i=0;i<10;i++){const a=rot+i*Math.PI/5-Math.PI/2,d=i%2?r*.45:r;c.lineTo(x+Math.cos(a)*d,y+Math.sin(a)*d)}c.closePath()}
+function drawMenu(n){const w=mc.clientWidth,h=mc.clientHeight;if(!w||!h)return;const d=Math.min(2,devicePixelRatio||1);if(mc.width!=(w*d|0)||mc.height!=(h*d|0)){mc.width=w*d;mc.height=h*d}
+const c=mx,dt=Math.min(.05,Math.max(0,(n-mlt)/1e3)||.016),t=n/1e3;mlt=n;c.setTransform(d,0,0,d,0,0);
+let g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,"#1b0f5e");g.addColorStop(.55,"#5b2bd6");g.addColorStop(1,"#ff6bd6");c.fillStyle=g;c.fillRect(0,0,w,h);
+[[.2,.3,.35,"rgba(56,189,248,.25)"],[.8,.5,.4,"rgba(244,114,182,.28)"]].forEach(q=>{const r=q[2]*w,rg=c.createRadialGradient(q[0]*w,q[1]*h,0,q[0]*w,q[1]*h,r);rg.addColorStop(0,q[3]);rg.addColorStop(1,"transparent");c.fillStyle=rg;c.fillRect(0,0,w,h)});
+MST.forEach(s=>{const x=((s.x-t*s.s)%1+1)%1*w;c.globalAlpha=.45+.55*Math.abs(Math.sin(t*2+s.p));c.fillStyle=s.c;c.fillRect(x,s.y*h*.85,s.r*1.6,s.r*1.6)});c.globalAlpha=1;
+const er=Math.min(w,h)*.075,ex=w*.86,ey=h*.17;c.fillStyle="#3b82f6";c.strokeStyle=DK;c.lineWidth=3;c.beginPath();c.arc(ex,ey,er,0,7);c.fill();c.stroke();
+c.save();c.beginPath();c.arc(ex,ey,er-1,0,7);c.clip();c.fillStyle="#4ade80";[[-.3,-.2,.45],[.35,.25,.4],[-.1,.5,.3]].forEach(q=>{c.beginPath();c.arc(ex+((q[0]*er+t*6)%(er*3)+er*3)%(er*3)-er*1.5,ey+q[1]*er,q[2]*er,0,7);c.fill()});c.restore();
+FST.forEach(s=>{s.x+=s.v*dt;s.r+=dt*1.2;if(s.x>1.05)s.x=-.05;if(s.x<-.05)s.x=1.05;const x=s.x*w,y=s.y*h+Math.sin(t*1.5+s.r)*6;c.fillStyle=s.c;c.strokeStyle=DK;c.lineWidth=2;pstar(c,x,y,s.s,s.r);c.fill();c.stroke();c.fillStyle="#fff9";c.fillRect(x-1,y-s.s*.3,3,3)});
+MA.forEach((a,i)=>{a.x-=a.v*dt;a.y+=a.vy*dt;a.r+=a.w*dt;if(a.x<-.12||a.y<-.1||a.y>.85)MA[i]=mkAst(0);const x=a.x*w,y=a.y*h;
+c.save();c.translate(x,y);c.rotate(a.r);c.fillStyle=a.c;c.strokeStyle=DK;c.lineWidth=3;c.beginPath();a.pts.forEach((p,k)=>{const an=k/9*6.283;c.lineTo(Math.cos(an)*a.s*p,Math.sin(an)*a.s*p)});c.closePath();c.fill();c.stroke();
+c.fillStyle="#0003";c.beginPath();c.arc(a.s*.3,-a.s*.25,a.s*.18,0,7);c.fill();c.beginPath();c.arc(-a.s*.35,a.s*.3,a.s*.12,0,7);c.fill();c.restore();
+if(a.face){c.save();c.translate(x,y);c.fillStyle="#fff";c.strokeStyle=DK;c.lineWidth=2;[-1,1].forEach(q=>{c.beginPath();c.arc(q*a.s*.3,-a.s*.1,a.s*.2,0,7);c.fill();c.stroke()});c.fillStyle=DK;[-1,1].forEach(q=>{c.beginPath();c.arc(q*a.s*.3+2,-a.s*.08,a.s*.09,0,7);c.fill()});c.beginPath();c.arc(0,a.s*.12,a.s*.22,.15*Math.PI,.85*Math.PI);c.lineWidth=3;c.stroke();c.restore()}});
+mcT-=dt;if(mcT<=0&&MC.length<8){MC.push(mkCom());mcT=.4+Math.random()*1}
+MC=MC.filter(m=>m.x>-.4&&m.y<1.1);MC.forEach(m=>{m.x+=m.vx*dt;m.y+=m.vy*dt;const px=m.x*w,py=m.y*h,vx=m.vx*w,vy=m.vy*h,l=Math.hypot(vx,vy),ux=vx/l,uy=vy/l,L=w*.24,tx=px-ux*L,ty=py-uy*L;
+const gr=c.createLinearGradient(px,py,tx,ty);gr.addColorStop(0,m.c);gr.addColorStop(1,"rgba(255,255,255,0)");c.strokeStyle=gr;c.lineCap="round";c.lineWidth=m.s*2.2;c.beginPath();c.moveTo(px,py);c.lineTo(tx,ty);c.stroke();c.lineWidth=m.s*.8;c.strokeStyle="rgba(255,255,255,.8)";c.beginPath();c.moveTo(px,py);c.lineTo(px-ux*L*.6,py-uy*L*.6);c.stroke();
+for(let k=0;k<6;k++){const f=(k+1)/7,sx=px-ux*L*f+Math.sin(t*6+k*2)*8,sy=py-uy*L*f+Math.cos(t*5+k*3)*8;c.fillStyle=PC[k%4];pstar(c,sx,sy,3+(1-f)*3,t*3+k);c.fill()}
+const hg=c.createRadialGradient(px,py,0,px,py,m.s*3);hg.addColorStop(0,"#fff");hg.addColorStop(1,"rgba(255,255,255,0)");c.fillStyle=hg;c.beginPath();c.arc(px,py,m.s*3,0,7);c.fill();c.fillStyle="#fff";c.strokeStyle=m.c;c.lineWidth=3;c.beginPath();c.arc(px,py,m.s,0,7);c.fill();c.stroke()});c.lineCap="butt";
+const R=w*2.2,top=h*.8,sf=x=>top+R-Math.sqrt(R*R-(x-w/2)**2);
+g=c.createLinearGradient(0,top,0,h);g.addColorStop(0,"#fdfbff");g.addColorStop(1,"#b9bfe8");c.fillStyle=g;c.strokeStyle=DK;c.lineWidth=4;c.beginPath();c.arc(w/2,top+R,R,0,7);c.fill();c.stroke();
+CRT.forEach(q=>{c.fillStyle="#aab0dd";c.strokeStyle="#8a90c8";c.lineWidth=3;c.beginPath();c.ellipse(q[0]*w,q[1]*h,q[2]*w,q[2]*w*.32,0,0,7);c.fill();c.stroke()});
+const sc=Math.min(1.7,w/480),ax=w*(.5+.34*Math.sin(t*.35)),fx=Math.cos(t*.35)>0?1:-1,hop=Math.abs(Math.sin(t*4))*14*sc,rx=ax-fx*52*sc;
+c.save();c.translate(rx,sf(rx)-15*sc);c.scale(sc,sc);rover(c,{x:0,y:0,a:t*4,fx});c.restore();
+c.save();c.translate(ax,sf(ax)-24*sc-hop);c.scale(sc,sc);astro(c,0,0,fx,t*9,1,0,0,0);c.restore()}
+
+/* ===== problems, foods, missions ===== */
+const pe=()=>G.prob&&G.prob.surge>0?Math.min(1,gen()*G.sf/Math.max(1,used())):1,effGen=()=>G.prob&&G.prob.surge>0?Math.round(gen()*G.sf):gen();
+const rScale=c=>{const n=parseFloat(c.slice(1))||0;return c[0]=="X"?(n>=20?5:n>=10?4:3):c[0]=="M"?(n>=5?2:1):0};
+const FIXMSG={radio:"📻 Radio fixed! Beep boop, you can hear again!",gps:"🛰️ GPS fixed! Your map knows where you are!",surge:"⚡ Breaker flipped! Power is back!",dust:"🧹 All clean! Dust brushed off!"};
+function schedEv(){const dy=G.cfg,hz=G.d.haz,H=G.H;G.fl.forEach(f=>{if(f.c>=1){G.ev.push({t:f.s+15,k:"radio",d:0});if(dy.ev>0&&Math.random()<(f.c>=2?.85:.4)*dy.ev)G.ev.push({t:f.s+2,k:"cme",d:0})}});
+if(dy.ev>0)for(let s=75+Math.random()*30;s<H-40;s+=(105+Math.random()*40)/(hz*dy.ev))G.ev.push({t:s,k:Math.random()<.5?"cme":"gps",d:0});
+for(let s=45+Math.random()*20;s<H-30;s+=(65+Math.random()*25)/(hz*dy.s))G.ev.push({t:s,k:"dust",d:0})}
+function startProb(k,kp0){const P=G.prob;let m="";if(k=="cme")return launchCME();
+if(k=="radio"){P.radio=40;m="📻 RADIO BLACKOUT! The flare made radio static. Go to the base and hold R to fix it!"}
+else if(k=="gps"){P.gps=35;m="🛰️ GPS wobble! Bumpy sky-layer bits are confusing your map. Go to the base and hold R!"}
+else if(k=="dust"){P.dust=25;m="🌫️ Sticky Moon dust all over your suit! Hold R to brush it off!"}
+else{const g=!kp0&&NS.gst.length?NS.gst[(G.j++)%NS.gst.length]:null,kp=kp0||(g?g.kp:6);P.surge=20+Math.round(kp*3);P.gps=35;G.sf=kp>=9?.25:kp>=7?.35:.5;
+m=`⚡ MAGNET STORM! A Sun-burp shook Earth's magnet bubble (Kp ${kp}: ${kp>=9?"EXTREME":kp>=7?"strong":"minor"})${g?` (NASA saw a real Kp ${kp} storm, level G${Math.max(1,Math.min(5,Math.round(kp)-4))}, on ${fmtD(g.t)})`:""}. Power is weak and GPS is wobbly! Base + hold R, and share power with B!`}
+G.last=m;beep(300,.4)}
+function probTick(dt,ins){const P=G.prob,B=G.bf;for(const k in P)if(P[k]>0)P[k]=Math.max(0,P[k]-dt);for(const k in B)if(B[k]>0)B[k]=Math.max(0,B[k]-dt);
+G.ev.forEach(e=>{if(!e.d&&G.t>=e.t){e.d=1;startProb(e.k)}});if(G.cme&&G.t>=G.cme.a){const cm0=G.cme;G.cme=null;startProb("storm",cm0.kp)}
+if(G.goal&&!G.built&&G.score>=G.goal){G.built=1;G.last=`🏗️ ${DAYS[G.day-1].st} is BUILT! Keep going for a better grade!`;beep(1100,.3);addPop("🏗️","Stage built!","Your "+DAYS[G.day-1].st+" is ready. Keep playing for a higher score!")}
+if(K.snack){K.snack=0;snack()}
+let fk=null;if(P.radio>0&&ins)fk="radio";else if(P.gps>0&&ins)fk="gps";else if(P.surge>0&&ins)fk="surge";else if(P.dust>0)fk="dust";
+if(K.fix&&fk){G.fixp+=dt;if(G.fixp>=(fk=="dust"?2:3)){G.fixp=0;P[fk]=0;G.nF++;G.score+=8;meta.cr+=8;save();G.last=FIXMSG[fk]+" +8 ⭐";beep(900,.15);puff(G.x,G.y,"#4ade80",10,120)}}else G.fixp=0;
+G.ch.forEach(c=>{if(!c.done&&c.get()>=c.n){c.done=1;meta.cr+=c.b;save();G.last=`🎯 Mission done: ${c.t}! +${c.b} 💰`;beep(1000,.2)}})}
+function probHud(){const e=$("#pr"),P=G.prob;if(!P||G.ph!="play"){e.hidden=true;return}const a=[];
+if(P.radio>0)a.push(`📻 Radio static ${P.radio|0}s → go to base, hold R`);if(P.gps>0)a.push(`🛰️ GPS wobble ${P.gps|0}s → go to base, hold R`);if(P.surge>0)a.push(`⚡ Power surge ${P.surge|0}s → base, hold R, share power (B)`);if(P.dust>0)a.push(`🌫️ Sticky dust ${P.dust|0}s → hold R`);if(G.fixp>0)a.push("🔧 Fixing… keep holding R!");
+if(G.cme)a.unshift(`🌪️ CME arrives in ${Math.max(0,Math.ceil(G.cme.a-G.t))}s (${G.cme.sp} km/s) → be in the base!`);e.hidden=!a.length;e.textContent=a.join("  ·  ")}
+function probTip(){const P=G.prob;if(G.cme)return`🌪️ A CME is coming in ${Math.max(0,Math.ceil(G.cme.a-G.t))}s! A countdown gives you time to get ready: go to the base and put power into the 🛡️ shield (Base, Power, Storm protocol).`;if(P.surge>0)return"⚡ Power surge! Go to the base, hold R to flip the breaker, and press B to share the little power wisely! Put it where you need it most.";if(P.radio>0)return"📻 Radio static! Go inside the base 🏠 and hold R. Sun flares cause radio blackouts!";if(P.gps>0)return"🛰️ Your GPS map is wobbly because a layer of Earth's sky is bumpy. Base + hold R fixes it!";if(P.dust>0)return"🌫️ Moon dust is sticky! Hold R to brush it off. Apollo astronauts had dusty suits too!";return""}
+const CHS=[["fix","🔧 Fix 3 problems",3,40,()=>G.nF],["rare","💎 Bank 4 rare rocks",4,50,()=>G.tally.slice(3).reduce((a,b)=>a+b,0)],["ice","🧊 Bank 2 Water Ice",2,35,()=>G.tally[4]],["eat","🍱 Eat 3 snacks",3,30,()=>G.nE],["pts","⭐ Score 150 points",150,45,()=>G.score],["hide","☀️ Get through 2 flares without fainting",2,40,()=>G.nB?0:G.fl.filter(f=>G.t>=f.s+35).length]];
+function pickCh(){return CHS.slice().sort(()=>Math.random()-.5).slice(0,3).map(c=>({id:c[0],t:c[1],n:c[2],b:c[3],get:c[4],done:0}))}
+function missionsHTML(){return `<h2>🎯 Missions</h2>${(G.ch||[]).map(c=>`<div class="row"><div>${c.done?"✅":"⬜"} ${c.t}<small>${Math.min(c.n,c.get())}/${c.n} · prize ${c.b} 💰</small></div></div>`).join("")}`}
+const FOODS=[
+{id:"tort",e:"🌯",n:"Tortilla wrap",p:10,fd:25,k:"Astronauts use tortillas instead of bread because crumbs would float everywhere!"},
+{id:"pb",e:"🥜",n:"Peanut butter",p:12,fd:20,stm:20,k:"Spreads are easy to eat in space because they stick to the food, not float away."},
+{id:"straw",e:"🍓",n:"Freeze-dried strawberries",p:15,fd:15,stm:30,k:"Freeze-dried food has the water taken out, so it is super light and lasts a long time!"},
+{id:"pasta",e:"🍝",n:"Pasta meal (add water)",p:25,fd:40,k:"Some space meals are dried. You add water to wake them up!"},
+{id:"bar",e:"🍫",n:"Energy bar",p:18,fd:10,bf:["speed",20],k:"Ready-to-eat snacks need no cooking, which is handy on busy days."},
+{id:"lett",e:"🥬",n:"Fresh lettuce",p:30,fd:20,hp:20,k:"Astronauts have really grown lettuce on the space station!"},
+{id:"tomato",e:"🍅",n:"Space tomato",p:35,fd:15,bf:["shield",30],k:"Kids in Canada grow tomato seeds in the Tomatosphere program! (Tough suit is a game power-up.)"},
+{id:"stew",e:"🍲",n:"Hot space stew",p:45,fd:60,hp:30,k:"Some meals are heated in pouches so they stay safe to eat for a long time."},
+{id:"juice",e:"🧃",n:"Juice pouch",p:14,fd:10,hp:15,stm:10,k:"Drinks come in pouches with a straw so they don't float away!"}];
+const invN=()=>Object.values(G.inv||{}).reduce((a,b)=>a+b,0),pcap=()=>6+3*L("pantry"),cm=()=>1+.2*L("chef");
+function fxText(f){const m=cm(),r=v=>Math.round(v*m),a=[`+${r(f.fd)} food`];if(f.hp)a.push(`+${r(f.hp)} health`);if(f.stm)a.push(`+${r(f.stm)} stamina`);if(f.bf)a.push(f.bf[0]=="speed"?`🏃 speedy ${r(f.bf[1])}s`:`🛡️ tough suit ${r(f.bf[1])}s`);return a.join(" · ")}
+function buyFood(id){const f=FOODS.find(x=>x.id==id);if(!f)return;if(meta.cr<f.p){G.last="💰 Not enough credits yet!";return ui()}if(invN()>=pcap()){G.last="🗄️ Pantry is full! Eat something or buy Pantry shelves.";return ui()}
+meta.cr-=f.p;G.inv[id]=(G.inv[id]|0)+1;save();G.last=`🛒 Bought ${f.e} ${f.n}!`;beep(700,.08);ui()}
+function eatFood(id){const f=FOODS.find(x=>x.id==id);if(!f||!(G.inv[id]>0))return;if(G.food>=100&&!f.hp&&!f.stm&&!f.bf){G.last="Your tummy is already full! 😋";return}
+const m=cm();G.inv[id]--;G.nE++;G.food=Math.min(100,G.food+f.fd*m);G.hp=Math.min(100,G.hp+(f.hp||0)*m);G.stm=Math.min(100,G.stm+(f.stm||0)*m);if(f.bf)G.bf[f.bf[0]]=f.bf[1]*m;G.last=`${f.e} Yum! ${f.n}: ${fxText(f)}`;beep(760,.1);if(G.pause)ui()}
+function snack(){const f=FOODS.find(x=>G.inv[x.id]>0);if(f)eatFood(f.id);else G.last="🍱 No snacks! Buy some in the base shop (press B)."}
+function foodPanel(){return `<p class="sm">💰 ${meta.cr} credits · 🍱 ${invN()}/${pcap()} in pantry · 👩‍🍳 Chef power ×${cm().toFixed(1)}</p><p>${G.last}</p><div class="two">${FOODS.map((f,i)=>`<div class="row" style="display:block"><b>${f.e} ${f.n}</b> <span class="chip">key ${i+1}</span><small>${fxText(f)}</small><small>💡 ${f.k}</small><button ${meta.cr<f.p||invN()>=pcap()?"disabled":""} onclick="buyFood('${f.id}')">Buy ${f.p}</button> <button ${G.inv[f.id]?"":"disabled"} onclick="eatFood('${f.id}')">Eat (${G.inv[f.id]|0})</button></div>`).join("")}</div><p class="sm">Upgrade 👩‍🍳 Space chef, 🌱 Garden and 🗄️ Pantry shelves in the Upgrades tab to make food stronger!</p>`}
+function baseHTML(){const TB=[["pw","⚡ Power"],["food","🍽 Food shop"],["up","🛒 Upgrades"],["ms","🎯 Missions"]];
+const tabs=`<div class="tabs">${TB.map(t=>`<button class="tab ${G.bt==t[0]?"on":""}" onclick="G.bt='${t[0]}';ui()">${t[1]}</button>`).join("")}</div>`;let b;
+if(G.bt=="food")b=foodPanel();else if(G.bt=="up")b=shop();else if(G.bt=="ms")b=missionsHTML();
+else b=`<p>Generator: <b>${effGen()} kW</b>${G.prob.surge>0?" ⚡ (storm! it is weak)":""} · in use: <b>${used()} kW</b> (game paused)</p>${stp("l","💨 Life support","Refills your air faster")}${stp("g","🥬 Greenhouse","Grows meals over time")}${stp("s","🛡️ Flare shield","Less radiation outside")}${G.prob.surge>0?"<p>⚡ Tip: during a storm, give the little power to what you need most!</p>":""}<p><button onclick="stormProto()">🛡️ Storm protocol</button></p><p class="sm">Shield first! Life support stays on and the greenhouse sleeps. Real engineers switch off non-essential things in a storm.</p>`;
+return `<h1>🏠 Base</h1>${tabs}${b}${G.end?'<button class="go" style="background:#fca5a5" onclick="if(confirm(\'End the endless trip?\'))endRun()">🏁 End trip</button>':""}<button class="go" onclick="closeBase()">Resume ➜</button>`}
+TIPS.push("🍅 Canadian classrooms grow Tomatosphere seeds that took a space-like trip. Cool!","🧂 Space salt and pepper are liquid! Tiny grains could float into eyes and machines.","👅 Food can taste bland in space, so many astronauts love spicy sauce! 🌶️","🫧 Fizzy drinks are tricky in space because bubbles don't rise like they do at home.","🥬 Astronauts have grown lettuce, radishes and even chili peppers on the space station!","🧑‍🍳 NASA and the Canadian Space Agency run the Deep Space Food Challenge to invent food for long trips!","🔴 Sunspots are cooler dark spots on the Sun. They come and go in an 11 year cycle!","⚡ A solar flare's light reaches us in about 8 minutes, super fast!","🌌 Auroras are glowing sky lights made when sun-stuff meets Earth's magnet bubble.","🧲 The Moon has no big magnet bubble like Earth, so a base needs its own shield!","📻 Flares can cause radio blackouts. Hold R in the base to fix yours!","🌫️ Moon dust is sticky and scratchy. Brush it off with R!");
+
+/* ===== Space School (left side) ===== */
+let SS="sun";const SW="https://www.spaceweather.gov/";
+const phRow=(e,n,t,g,u)=>`<details class="ph"><summary>${e} ${n}</summary><p>${t}</p>${g?`<p class="gm">🎮 In the game: ${g}</p>`:""}<a href="${SW}${u}" target="_blank" rel="noopener noreferrer">🔗 Grown-up page (spaceweather.gov)</a></details>`;
+const SUN=[
+["🔴","Sunspots and the Solar Cycle","Sunspots are dark patches on the Sun where strong magnets get all tangled up. They look dark because they are cooler than the Sun around them! The Sun grows lots of spots, then fewer, then lots again, in a cycle that lasts about 11 years.","More spots usually means more flares, so busy Sun years are riskier.","phenomena/sunspotssolar-cycle"],
+["⚡","Solar Flares (Radio Blackouts)","A flare is a big flash of light and energy from the Sun, like a sneeze! Its light gets to us in about 8 minutes. Flares have sizes: C is little 🐣, M is medium 🐯 and X is GIANT 🦖. Big ones can make radio signals on Earth go fuzzy. That is called a radio blackout.","The flare banners are real NASA flares. Medium and giant ones cause 📻 Radio static. Fix it in the base with R!","phenomena/solar-flares-radio-blackouts"],
+["🌪️","Coronal Mass Ejections (CMEs)","A CME is a giant bubble of Sun-stuff and magnets that burps out of the Sun. It is slower than a flare and can take a few days to cross space. If it hits Earth, it can shake Earth's magnet bubble.","CMEs start the ⚡ magnet storms that weaken your power and wobble your GPS.","phenomena/coronal-mass-ejections"],
+["🕳️","Coronal Holes","Coronal holes are dark patches in the Sun's outer layer where the magnets are open like a window. Sun-wind zooms out of them extra fast!","Fast sun-wind helps make storms; the storm events in the game remind you of this.","phenomena/coronal-holes"],
+["💨","Solar Wind","The solar wind is a never-ending breeze of teeny tiny charged bits blowing out from the Sun in every direction. It is why comet tails always point away from the Sun!","Comets in the menu have tails pointing away from the Sun. Can you see it?","phenomena/solar-wind"],
+["🔆","Solar EUV Irradiance","EUV is extreme ultraviolet light from the Sun. You can't see it, but it warms up the high, thin air around Earth and makes it puff up bigger.","This puffing up is why satellites get tugged lower (satellite drag).","phenomena/solar-euv-irradiance"],
+["📻","F10.7 cm Radio Emissions","The Sun makes radio waves too! Scientists measure a special one called F10.7. It is like a thermometer that tells how busy the Sun is.","","phenomena/f107-cm-radio-emissions"]];
+const EARTH=[
+["🧲","Earth's Magnetosphere","Earth is like a giant magnet with an invisible bubble around it. The bubble pushes most sun-stuff away and keeps us safe. The Moon doesn't have a big bubble like that, so astronauts there need shields!","Your 🛡️ flare shield is like a mini magnet bubble for the base.","phenomena/earths-magnetosphere"],
+["🌌","Aurora","When sun-stuff slides into Earth's magnet bubble near the poles, the sky glows in green, pink and purple curtains. These are the Northern and Southern Lights!","","phenomena/aurora"],
+["🌩️","Geomagnetic Storms","A geomagnetic storm happens when a CME or fast sun-wind shakes Earth's magnet bubble. Scientists give them a level from G1 (small) to G5 (extreme).","⚡ Magnet storm events show a real NASA storm level when NASA data is live.","phenomena/geomagnetic-storms"],
+["🛰️","Ionosphere","The ionosphere is a layer of Earth's high air where sunlight turns gas into charged bits. Some radio waves bounce off it like a trampoline!","","phenomena/ionosphere"],
+["✨","Ionospheric Scintillation","Sometimes the ionosphere gets bumpy patches. Signals passing through twinkle like stars, so GPS and satellite messages can get wobbly.","🛰️ GPS wobble in the game!","phenomena/ionospheric-scintillation"],
+["🔢","Total Electron Content (TEC)","Scientists count how many charged bits are in a tall pillar of the ionosphere. More bits can slow GPS signals, so the count helps fix GPS errors.","","phenomena/total-electron-content"],
+["🍩","Radiation Belts","Two donut-shaped rings of zippy particles are trapped by Earth's magnet. They are called the Van Allen belts. Satellites passing through must be tough!","","phenomena/radiation-belts"],
+["☢️","Solar Radiation Storm","Super fast tiny particles from big flares and CMEs can zoom through space. They can hurt satellites and astronauts, so astronauts hide in the safest part of their spacecraft. Levels go from S1 to S5.","Hide in the base during flares. The 🛡️ shield and 🍅 tomato power-up make it safer!","phenomena/solar-radiation-storm"],
+["🌠","Galactic Cosmic Rays","These are fast particles from far away, from exploded stars. They are always around. They are a bit weaker when the Sun is very busy, because the strong solar wind pushes some away.","","phenomena/galactic-cosmic-rays"]];
+const IMP=[
+["⚡","Electric Power Transmission","Magnet storms can push extra electric current into long power lines and make big transformers too hot. Power companies watch the alerts and get ready.","⚡ Power surge: your generator gets weak.","impacts/electric-power-transmission"],
+["🧭","GPS Systems","GPS uses signals from satellites. A bumpy ionosphere can make the signal slow or wobbly, so a map can be a little wrong.","🛰️ GPS wobble: your minimap jumps around.","impacts/space-weather-and-gps-systems"],
+["📻","HF Radio Communications","Pilots and ships use high-frequency radio that bounces off the ionosphere. A flare can make it go quiet on the sunny side of Earth.","📻 Radio blackout: minimap static and rover scanner off.","impacts/hf-radio-communications"],
+["📡","Satellite Communications","Space weather can confuse or zap satellites, so phone and TV signals from space can fizzle.","","impacts/satellite-communications"],
+["🛰️","Satellite Drag","Storms heat Earth's high air so it puffs up. Satellites run into more air and get pulled lower, so operators must steer them back up.","","impacts/satellite-drag"]];
+const CSA="https://www.asc-csa.gc.ca/eng/",lk=(u,t)=>`<li><a href="${u}" target="_blank" rel="noopener noreferrer">${t}</a></li>`;
+function sideBody(){
+if(SS=="quiz")return quizBody();if(SS=="sun")return `<p>🌞 The Sun changes all the time, from hours to years! Tap a card to learn.</p>${SUN.map(x=>phRow(...x)).join("")}`;
+if(SS=="earth")return `<p>🌍 What happens when sun-stuff reaches Earth?</p>${EARTH.map(x=>phRow(...x)).join("")}<p><b>Real-life helpers:</b></p>${IMP.map(x=>phRow(...x)).join("")}`;
+if(SS=="fix")return `<p>🔧 Problems can pop up. Here is how to fix them!</p>
+<div class="fixrow"><b>📻 Radio blackout</b>Cause: a medium or giant flare. Fix: go into the base and hold R for 3 seconds. Real life: operators switch to other frequencies or wait.</div>
+<div class="fixrow"><b>🛰️ GPS wobble</b>Cause: a bumpy ionosphere. Fix: base + hold R. Real life: GPS users wait, or use extra tools that correct errors.</div>
+<div class="fixrow"><b>⚡ Power surge</b>Cause: a magnet storm from a CME. Fix: base + hold R, then press B and give the small power to what matters most. Real life: power companies adjust the grid.</div>
+<div class="fixrow"><b>🌫️ Sticky Moon dust</b>Cause: the Moon's scratchy, clingy dust. Fix: hold R for 2 seconds anywhere. Real life: Apollo astronauts brushed dust off, but it still clung to everything!</div>
+<div class="fixrow"><b>☀️ Flare or radiation</b>Fix: run into the base and keep the shield powered. M and X flares also knock out robots with no shield (your rover goes OFFLINE if the shield has under 10 kW) and Sun particles (SEP) drain your stamina outside.</div><div class="fixrow"><b>🌪️ CME countdown</b>A CME takes hours to days in real life, so you get a countdown. Be in the base and put power in the 🛡️ shield first (try the Storm protocol button in Base, Power). 🍅 Tomato power-up helps too.</div>
+<div class="fixrow"><b>💨 Low air</b>Fix: go home or grab 🧊 Water Ice.</div>
+<div class="fixrow"><b>🍎 Hungry tummy</b>Fix: eat a meal (F) or buy snacks in the base shop (B, then Food shop). Keys 1-9 or Q eat snacks.</div>
+<div class="fixrow"><b>🎯 Missions</b>Finish 3 missions each trip for bonus credits!</div>`;
+if(SS=="api")return `${donkiInfo()}<p>📡 <b>How the game talks to NASA</b></p><ol><li>📞 <b>Ask:</b> the game calls NASA's DONKI. That stands for Database Of Notifications, Knowledge, Information!</li><li>📬 <b>Answer:</b> NASA's computer sends a list of what the Sun did in the last 30 days.</li><li>🔍 <b>Read:</b> we pick out flares (FLR), Sun-burps (CME), magnet storms (GST) and particle storms (SEP).</li><li>🎮 <b>Play:</b> real flares become your flare warnings. Real storms become your magnet storms!</li></ol><p>🔌 If we can't reach NASA, we use a saved copy or a few old real flares.</p><div class="fixrow"><b>Where it asks</b><code>ccmc.gsfc.nasa.gov/DONKI-API/get/FLR</code><br><code>…/get/CME</code> · <code>…/get/GST</code> · <code>…/get/SEP</code></div><div class="fixrow"><b>Right now</b>${NS.busy?"☎️ Calling NASA…":NS.st=="live"?"🟢 Live! ":NS.st=="cache"?"💾 Using a saved copy. ":"📼 Using old examples. "}Flares: <b>${NS.flares.length}</b> · CMEs: <b>${NS.cmes}</b> · Magnet storms: <b>${NS.gst.length}</b> · Particle storms: <b>${NS.sep}</b></div><p><button onclick="loadNasa()" ${NS.busy?"disabled":""}>🔄 Ask NASA again</button></p><p>⚠️ This is a game, so numbers are simplified. For real forecasts, grown-ups can visit NOAA's Space Weather Prediction Center at <a href="${SW}" target="_blank" rel="noopener noreferrer">spaceweather.gov</a>. Data from NASA's Space Weather Database (<a href="https://ccmc.gsfc.nasa.gov" target="_blank" rel="noopener noreferrer">ccmc.gsfc.nasa.gov</a>).</p>`;
+return `<p>🍽 <b>Space food facts</b> (from NASA and the Canadian Space Agency)</p><ul><li>🌯 Tortillas replace bread because crumbs float.</li><li>🧂 Salt and pepper are liquids so grains don't float into eyes or machines.</li><li>👅 Food tastes blander in space, so spicy sauce is popular.</li><li>🥬 Astronauts grew lettuce, radishes and chili peppers on the space station.</li><li>🍅 Tomatosphere lets classrooms grow tomato seeds that took a space-like trip.</li><li>🧑‍🍳 NASA and the Canadian Space Agency run the Deep Space Food Challenge for long trips.</li><li>🪶 Light, long-lasting food (freeze-dried) is great because every kilo is costly to launch!</li><li>🔥 Astronauts need about 1,900 to 3,200 food-calories (kcal) a day, and spacewalks burn about 200 extra every hour. In the game, being outside uses food faster!</li><li>⚖️ A 4-person crew needs about 10,500 kg of packed food for a 3 year trip, and packed meals are almost half water (about 46%).</li><li>🌱 Greenhouses cost power and water, but give fresh food, oxygen and vitamins.</li><li><a href="https://www.asc-csa.gc.ca/eng/youtheducators/toolkits/food-production/" target="_blank" rel="noopener noreferrer">Canadian Space Agency: Food Production toolkit</a></li></ul><p><b>🎮 Food in the game</b></p><p>Open the base (B) → Food shop. Foods give food, health, stamina or a short power-up. Upgrade 👩‍🍳 Space chef (foods stronger), 🌱 Garden (more meals) and 🗄️ Pantry (more snack slots) to make them better!</p><p><b>📖 Reading list</b></p><ul>${lk(CSA+"astronauts/living-in-space/eating-in-space.asp","Eating in space")}${lk("https://letstalkscience.ca/news-media/growing-food-in-space-how-canada-tackling-food-security-on-earth-and-beyond","Growing food in space (Let's Talk Science)")}${lk(CSA+"sciences/food-production/","Food in space: the challenges")}${lk(CSA+"sciences/food-production/growing-healthy-food-in-space-and-remote-areas.asp","Growing healthy food in space and remote areas")}${lk(CSA+"sciences/food-production/deep-space-food-challenge.asp","Deep Space Food Challenge")}${lk(CSA+"satellites/everyday-lives/agriculture-in-the-satellite-age.asp","Agriculture in the satellite age")}</ul><p><b>🧪 Things to do</b></p><ul>${lk(CSA+"youth-educators/activities/fitness-and-nutrition/","Food and nutrition activities (Grades 6-9)")}${lk(CSA+"youth-educators/activities/fitness-and-nutrition/interplanetary-farming.asp","Interplanetary Farming")}${lk(CSA+"youth-educators/activities/fitness-and-nutrition/space-jam-an-astronaut-lunch.asp","Space Jam! An Astronaut Lunch")}${lk(CSA+"youth-educators/tomatosphere.asp","Tomatosphere")}${lk(CSA+"youth-educators/activities/tomatosphere-adventure-minecraft-education-game-featuring-extraterrestrial-agriculture.asp","Tomatosphere Adventure (Minecraft)")}${lk(CSA+"multimedia/search/image/15774","Infographic: What do explorers eat?")}</ul>`}
+
+/* ===== v9: difficulty, days, build stages, quiz, NASA + CSA engineering facts ===== */
+const DIF=[{n:"Easy",e:"🐣",c:"g",goal:.7,haz:.7,dmg:.7,o2:.8,fd:.8,h:"More air, less hungry, fewer surprises"},{n:"Normal",e:"🚀",c:"b",goal:1,haz:1,dmg:1,o2:1,fd:1,h:"The real space trip!"},{n:"Hard",e:"🔥",c:"o",goal:1.3,haz:1.35,dmg:1.3,o2:1.2,fd:1.2,h:"More flares, more hunger. For experts!"}];
+const DAYS=[
+{n:1,em:"🌅",t:"Landing Day",st:"Solar Farm",bi:"🔋",goal:90,mx:0,f:.8,m:.6,ev:0,s:.7,perk:"+5 kW more power on the next days",d:"Land on the Moon! Only little C-class flares ☀️ and a few space rocks. Learn the ropes and build the Solar Farm!"},
+{n:2,em:"🌤️",t:"Growing Day",st:"Greenhouse Dome",bi:"🌱",goal:170,mx:1,f:1,m:.9,ev:.7,s:1,perk:"Meals grow 30% faster on Day 3",d:"Medium M-class flares can knock out radio and robots 🤖. A Sun-burp (CME) may follow, with a countdown!"},
+{n:3,em:"🌙",t:"Storm Day",st:"Shield Tower",bi:"🛡️",goal:260,mx:2,f:1.2,m:1.1,ev:1.2,s:1.2,perk:"The outpost is complete! 🎉",d:"Giant X-class flares, CME magnet storms and Sun particles! Share your power wisely and try the Storm protocol in the base."}];
+const SEL={dif:1,day:1,dur:300,end:0},dayGoal=i=>Math.round(DAYS[i].goal*SEL.dur/300*DIF[SEL.dif].goal);
+const FLFX=["C = minor flare: tiny radiation.","M = moderate flare: radio static, and robots with no shield go offline!","X = MAJOR flare: radio blackout, strong radiation, and a CME may follow!"];
+TIPS.push("🌪️ A CME takes hours to days to reach Earth. That gives a countdown to get ready!","🌩️ The Kp number goes from 0 to 9. Kp 5 is a small storm, 7 is strong and 9 is extreme!","🔥 Spacewalks burn about 200 extra food-calories every hour, so astronauts get hungrier outside!","🤖 M and X flares can knock out robots that have no shield. Keep your 🛡️ shield powered!","⚖️ Launching heavy food is costly. A 4-person crew needs about 10,500 kg for a 3 year trip!","🍽️ Astronauts need about 1,900 to 3,200 food-calories (kcal) every day.");
+function buildTxt(){if(G.end)return"♾️ Endless · ";if(!G.goal)return"";const d=DAYS[G.day-1];return`🏗️ ${d.bi} ${d.st} ${G.built?"✅ BUILT!":Math.min(G.score,G.goal)+"/"+G.goal+" ⭐"} · `}
+function site(c){if(!G.day)return;const t=Date.now()/1000,x=1800,y=1062,w=86;c.save();c.lineWidth=2;c.strokeStyle="#12192f";c.textAlign="center";
+for(let i=0;i<G.day-1;i++){c.font="26px sans-serif";c.fillText(DAYS[i].bi,x+16+i*34,y+34)}
+const p=Math.min(1,G.score/G.goal),st=p>=1?3:p>=.66?2:p>=.33?1:0;
+c.fillStyle="#6b7088";c.fillRect(x-6,y,w+12,9);c.strokeRect(x-6,y,w+12,9);
+c.strokeStyle="#facc15";c.setLineDash([6,5]);c.strokeRect(x,y-80,w,80);c.setLineDash([]);c.strokeStyle="#12192f";
+if(st>=1){c.fillStyle="#9aa1ba";c.fillRect(x+4,y-22,w-8,22);c.strokeRect(x+4,y-22,w-8,22)}
+if(st>=2){c.fillStyle="#cfd4e4";c.fillRect(x+10,y-52,w-20,30);c.strokeRect(x+10,y-52,w-20,30)}
+if(st>=3){c.fillStyle="#4ade80";c.fillRect(x+16,y-76,w-32,24);c.strokeRect(x+16,y-76,w-32,24);c.font="30px sans-serif";c.fillText(DAYS[G.day-1].bi,x+w/2,y-86+Math.sin(t*3)*3)}
+const tx=st>=3?"✅ BUILT!":"🏗️ "+Math.round(p*100)+"%";c.font="bold 12px sans-serif";c.lineWidth=3;c.strokeStyle="#14123a";c.strokeText(tx,x+w/2,y-120);c.fillStyle="#fff";c.fillText(tx,x+w/2,y-120);c.restore()}
+function launchCME(){if(G.cme)return;const sp=NS.fast>0&&NS.st!="sample"?clamp(Math.round(NS.fast*(.4+Math.random()*.6)),400,2800):Math.round(500+Math.random()*1300),kp=clamp(Math.round(3+sp/350),5,9),dl=clamp(Math.round(36000/sp)+8,18,50);G.cme={a:G.t+dl,sp,kp};G.last=`🌪️ CME DETECTED! A giant Sun-bubble is flying at ${sp} km/s and reaches us in ${dl}s. Get in the base and power the 🛡️ shield!`;addPop("🌪️","CME incoming!",`Arrives in ${dl}s. Be in the base with the shield on!`);beep(300,.3)}
+function stormProto(){const g=gen();G.pw.l=10;G.pw.g=0;G.pw.s=Math.max(0,Math.min(25,Math.floor((g-10)/5)*5));G.last="🛡️ Storm protocol on! Shield first, greenhouse sleeping.";ui()}
+function endRun(){if(G.ph!="play")return;G.ph="end";G.pause=false;finish();ui()}
+function dayBanner(){if(G.end){const m=G.t|0;return `<h2 style="text-align:center">♾️ Endless trip: ${m/60|0}:${String(m%60).padStart(2,"0")}</h2>`}if(!G.goal)return"";const d=DAYS[G.day-1];return G.win?`<div class="panel" style="background:#dcfce7"><h2>✅ Day ${d.n} complete!</h2><p>${d.bi} <b>${d.st}</b> is built! 🎁 ${d.perk}</p><p>⭐ ${G.score} / 🎯 ${G.goal}</p></div>`:`<div class="panel" style="background:#fee2e2"><h2>🏗️ Not finished yet!</h2><p>You needed <b>${G.goal}</b> points to build the ${d.st}. You got <b>${G.score}</b>. Try again, you can do it!</p></div>`}
+function endBtns(){const b=[`<button class="go" onclick="begin(SEL.dur)">🔁 ${G.end?"Run again":"Replay Day "+G.day}</button>`];if(G.goal&&G.win&&G.day<3)b.push(`<button class="go" onclick="SEL.day=${G.day+1};begin(SEL.dur)">▶ Next: Day ${G.day+1}</button>`);if(G.goal)b.push(`<button class="go" onclick="G={ph:'menu'};MS='day';ui()">📅 Pick a day</button>`);b.push(`<button class="go" onclick="G={ph:'menu'};MS='home';ui()">🏠 Menu</button>`);return `<div class="two">${b.join("")}</div>`}
+function endBody(){const c=meta.camp,sum=c.best.reduce((a,b)=>a+b,0);return `<div style="text-align:center"><span class="fw">🎆</span><span class="fw" style="animation-delay:.2s">🌙</span><span class="fw" style="animation-delay:.4s">🏠</span><span class="fw" style="animation-delay:.6s">🎇</span><h2 class="mh">🎉 OUTPOST COMPLETE! 🎉</h2></div><div class="panel"><p>You did it, Space Explorer! 👩‍🚀 In 3 days you built a whole Moon outpost:</p>${DAYS.map(d=>`<div class="row"><div>${d.bi} <b>${d.st}</b><small>Day ${d.n} · best score ${c.best[d.n-1]||0} ⭐ · ${d.perk}</small></div><b>✅</b></div>`).join("")}<p>⭐ Total best score: <b>${sum}</b></p></div><div class="panel"><h2>🎓 What you learned</h2><ul><li>☀️ Flares come in C (small), M (medium) and X (BIG). M and X can knock out radio and robots!</li><li>🌪️ A CME takes hours to days to arrive, so a countdown gives you time to get ready.</li><li>🌩️ The Kp number (0 to 9) shows how strong a magnet storm is. 9 is extreme!</li><li>☢️ Super-fast Sun particles are dangerous outside, so hide in the shielded base.</li><li>🥬 A greenhouse needs power and water, but it makes fresh food and air!</li></ul></div><p class="mut">⭐ Want a better score? Pick any day and play it again!</p>`}
+const endingHTML=rep=>rep?`<div class="mwrap">${endBody()}${BACK}</div>`:`<div style="max-width:560px;margin:0 auto">${endBody()}<button class="go" onclick="G.endScr=0;ui()">Continue ➜</button></div>`;
+const diffHTML=()=>`<div class="mwrap"><h2 class="mh">🎚️ Pick your level!</h2><div class="panel"><p>How brave are you today, Space Explorer? 🧑‍🚀</p></div>${DIF.map((d,i)=>mb(d.c,`${d.e} ${d.n}<small>${d.h}</small>`,`SEL.dif=${i};nav('len')`)).join("")}${BACK}</div>`;
+const lenHTML=()=>{const d=DIF[SEL.dif];return `<div class="mwrap"><h2 class="mh">⏱️ How long?</h2><div class="panel"><p>Level: <b>${d.e} ${d.n}</b></p><p>Dig up shiny rocks 🪨, hide from the Sun's sneezes ☀️🤧 and dodge space rocks ☄️!</p><p>📡 Real flares from NASA show up in your game!</p><p>♾️ Best endless score: <b>${meta.rec.eb||0}</b></p></div>${mb("g","🐣 Quick Trip<small>5 minutes · pick a day next</small>","SEL.dur=300;SEL.end=0;nav('day')")}${mb("o","🦖 Long Trip<small>10 minutes · pick a day next</small>","SEL.dur=600;SEL.end=0;nav('day')")}${mb("p","♾️ Endless<small>No timer! Press End trip in the base when done</small>","SEL.end=1;begin(300)")}<button class="mb y bk" onclick="nav('play')">⬅ Back</button></div>`};
+const dayHTML=()=>{const d=DIF[SEL.dif],c=meta.camp;return `<div class="mwrap"><h2 class="mh">📅 Pick a day!</h2><div class="panel"><p>${d.e} ${d.n} · ${SEL.dur/60} minutes. Build the outpost one stage each day!</p><p style="font-size:1.8rem;text-align:center;margin:2px">${DAYS.map((x,i)=>c.done[i]?x.bi:"🔲").join(" ")}</p></div>${DAYS.map((x,i)=>{const open=i==0||c.done[i-1],done=c.done[i];return `<div class="panel"><h2>${x.em} Day ${x.n}: ${x.t}</h2><p>${x.d}</p><p>🏗️ Build: <b>${x.bi} ${x.st}</b><br>🎁 ${x.perk}<br>🎯 Goal: <b>${dayGoal(i)} ⭐</b></p><p>${done?"✅ Built! Best score: "+c.best[i]:open?"🏗️ Ready to build":"🔒 Finish Day "+i+" first"}</p><button class="go" ${open?"":"disabled"} onclick="SEL.day=${i+1};begin(SEL.dur)">${!open?"🔒 Locked":done?"🔁 Play Day "+x.n+" again":"▶ Play Day "+x.n}</button></div>`}).join("")}<button class="mb y bk" onclick="nav('len')">⬅ Back</button></div>`};
+/* ----- quiz ----- */
+const QZ_ALL=[
+["What is a solar flare?","A big flash of light and energy from the Sun ☀️","A rock on the Moon 🪨","A kind of rocket 🚀","A flare is like the Sun sneezing! It is a giant flash of light and energy."],
+["How long does flare light take to reach Earth?","About 8 minutes ⚡","About 8 days","About 8 years","Light is super fast! Flare light gets here in about 8 minutes."],
+["Flares come in sizes C, M and X. Which one is the BIGGEST?","X-class 🦖","C-class 🐣","M-class 🐯","C is little, M is medium and X is the biggest, a major flare!"],
+["What can M-class and X-class flares do?","Make radio fuzzy and knock out robots with no shield 📻","Make the Moon bigger 🌕","Turn rocks into cheese 🧀","Strong flares cause radio blackouts and can switch off electronics that are not shielded. Shields help!"],
+["What is a CME?","A giant bubble of Sun-stuff that burps into space 🌪️","A moon rock that glows 💎","A space snack 🍫","CME means Coronal Mass Ejection. It is a huge cloud of Sun-stuff and magnets."],
+["How long can a CME take to reach Earth?","A few hours up to a few days 🕒","One blink 👀","One whole year 📅","CMEs are slower than light. Scientists can see them coming, so there is a countdown to get ready!"],
+["Why is it great that scientists can see a CME coming?","We get a countdown to get ready 🛡️","It makes the CME go away","It makes the Sun cooler","The travel time gives astronauts a chance to hide in the base and send power to the shield."],
+["The Kp number goes from 0 to 9. What does it measure?","How strong a magnet storm is 🌩️","How many rocks are on the Moon","How tall an astronaut is","Kp 5 is a small storm, Kp 7 is strong and Kp 9 is extreme!"],
+["Which Kp number is an EXTREME storm?","Kp 9","Kp 0","Kp 2","Kp 9 is the top of the scale. Kp 5 is minor and Kp 7 is strong."],
+["What are SEPs (Solar Energetic Particles)?","Super-fast tiny bits from the Sun that can hurt astronauts outside ☢️","Space cookies 🍪","Tiny moons 🌙","SEPs zoom out after big Sun blasts. Outside the base they make astronauts tired and sick, so hide inside!"],
+["Where is the safest place in a radiation storm?","Inside a shielded base 🏠","On top of a hill","Next to a crater","Shielded walls block many of the zippy particles."],
+["Why do astronauts carry air tanks on the Moon?","The Moon has NO air to breathe 💨","The air smells funny","Tanks look cool","The Moon has almost no air, so astronauts bring their own."],
+["Why do sunspots look dark?","They are cooler than the Sun around them 🔴","They are made of coal","They are holes to space","Sunspots are still very hot, just cooler than the bright parts."],
+["How long is the Sun's busy-and-sleepy cycle?","About 11 years","About 1 day","About 100 years","The Sun has more spots and flares, then fewer, then more again about every 11 years."],
+["What protects Earth from most Sun-stuff?","Earth's invisible magnet bubble 🧲","Clouds ☁️","Trees 🌳","The magnetosphere pushes most Sun-stuff away. The Moon has no big one, so a base needs a shield!"],
+["What makes the Northern Lights (aurora)?","Sun-stuff meeting Earth's magnet bubble 🌌","Street lamps","Fireflies","Charged bits slide down near the poles and make the sky glow."],
+["Why do astronauts eat tortillas instead of bread?","Crumbs would float into machines 🌯","Tortillas are round","Bread is too tasty","Floating crumbs can get into eyes and equipment."],
+["About how much food energy does an astronaut need each day?","1,900 to 3,200 calories (kcal) 🍽️","About 10 calories","About 100,000 calories","That is about what busy people need on Earth."],
+["Spacewalks make astronauts extra hungry. How many EXTRA calories per hour?","About 200 🏃","About 0","About 20,000","Hard work outside burns about 200 extra kcal every hour. In the game, being outside uses food faster!"],
+["Packed space food is almost half water. Why does that matter for rockets?","Water is heavy, so the food costs more to launch ⚖️","Water makes rockets sing","It does not matter","A 4-person crew needs about 10,500 kg of food for 3 years. Light food is a big help!"],
+["Why is freeze-dried food good for space?","It is light and lasts a long time 🍓","It is very heavy","It makes noise","The water is taken out, so it weighs less and keeps for ages."],
+["What does a space greenhouse give astronauts?","Fresh food, vitamins and oxygen 🥬","Moon rocks","Rocket fuel","Plants also clean the air, which helps close the life-support loop."],
+["What does a greenhouse cost to run?","Power for lights and pumps, plus water 💡","Nothing at all","A sunburn","Growing plants takes lights and pumps, so greenhouse power is a trade-off in the game."],
+["A storm is coming! What is the smart power plan?","Shield first, and pause the extras 🛡️","Turn everything on full","Turn off the air","Engineers send power to shielding and life support and switch off non-essential things for a while."]];
+const QZ_EASY=[
+["Is the Sun hot or cold?","Hot 🔥","Cold 🧊","The Sun is super, super hot!"],
+["What do we call the Sun's sneeze?","A solar flare 🤧","A pizza 🍕","A flare is a big flash of light from the Sun."],
+["Does the Moon have air to breathe?","No, it does not 🚫","Yes, lots of air 🌬️","The Moon has no air, so astronauts bring air with them."],
+["Where do you hide when the Sun sneezes?","In the base 🏠","Outside in the dust 🌫️","The base keeps astronauts safe."],
+["What do astronauts carry to breathe on the Moon?","An air tank 💨","A teddy bear 🧸","The tank gives them air to breathe."],
+["Which one can grow in a space garden?","Lettuce 🥬","A car 🚗","Astronauts really grew lettuce in space!"],
+["Why do astronauts like tortillas?","No crumbs float away 🌯","They are square 🟦","Floating crumbs can get into machines."],
+["What are the pretty lights in the sky near the poles called?","Aurora 🌌","Street lamps 💡","Sun-stuff meets Earth's invisible hug and the sky glows!"],
+["What can astronauts drink from the Moon?","Ice made of water 🧊","A lake of juice 🧃","There is frozen water hiding in dark Moon craters."],
+["Which flare is the BIGGEST?","X 🦖","C 🐣","C is little, M is medium and X is the biggest."],
+["What keeps Earth safe like an invisible hug?","A magnet bubble 🧲","A fluffy blanket 🛏️","Earth's magnet bubble pushes away most Sun-stuff."],
+["The air is getting low! What do you do?","Go back to the base 🏠","Take a nap 😴","The base fills your air tank back up."]];
+let QS={st:"intro",mode:"big",qs:[],i:0,s:0,pick:null,opts:[],nw:0};
+const qBank=m=>m=="easy"?QZ_EASY:QZ_ALL,qKey=(m,n)=>m=="easy"?"e"+n:n;
+const qOpts=(m,n)=>{const q=qBank(m)[n],c=q.length-2;return [...Array(c).keys()].sort(()=>Math.random()-.5).map(k=>({t:q[1+k],ok:k==0}))};
+function qzStart(m){m=m||QS.mode||"big";const ix=qBank(m).map((_,i)=>i).sort(()=>Math.random()-.5).slice(0,5);QS={st:"q",mode:m,qs:ix,i:0,s:0,pick:null,opts:qOpts(m,ix[0]),nw:0};ui()}
+function qzPick(k){if(QS.st!="q"||QS.pick!=null)return;QS.pick=k;const n=QS.qs[QS.i],key=qKey(QS.mode,n),pr=QS.mode=="easy"?3:5;if(QS.opts[k].ok){QS.s++;beep(900,.12);if(!meta.quiz.got[key]){meta.quiz.got[key]=1;meta.cr+=pr;QS.nw+=pr;save()}}else beep(200,.2);ui()}
+function qzNext(){QS.i++;QS.pick=null;if(QS.i>=QS.qs.length){QS.st="end";const bk=QS.mode=="easy"?"be":"best";if(QS.s>(meta.quiz[bk]|0)){meta.quiz[bk]=QS.s;save()}}else QS.opts=qOpts(QS.mode,QS.qs[QS.i]);ui()}
+function quizBody(){const q=QS,easy=q.mode=="easy";
+if(q.st=="intro"){const ge=Object.keys(meta.quiz.got).filter(k=>String(k)[0]=="e").length,gb=Object.keys(meta.quiz.got).length-ge;return `<p>❓ Pick a quiz! Each one has 5 questions. Get ⭐ stars and win 💰 credits!</p><p>🧸 Tiny quiz: best <b>${meta.quiz.be|0}/5</b> · learned ${ge}/${QZ_EASY.length}<br>🎓 Big kid quiz: best <b>${meta.quiz.best|0}/5</b> · learned ${gb}/${QZ_ALL.length}</p><p class="sm">Every new right answer gives credits, one time only (tiny quiz +3, big kid quiz +5).</p><button class="go" onclick="qzStart('easy')">🧸 Tiny quiz (super easy)</button><button class="go" style="background:#7dd3fc" onclick="qzStart('big')">🎓 Big kid quiz</button>`}
+if(q.st=="end"){const s=q.s;return `<p class="big">${s>=5?"🏆":s>=3?"🎉":"💪"}</p><p style="text-align:center"><b>${s} out of 5!</b><br>${"⭐".repeat(s)}${"▫️".repeat(5-s)}</p><p style="text-align:center">${s>=5?"Perfect! You are a space expert!":s>=3?"Great job, astronaut!":"Nice try! Peek at the Learn class and try again!"}</p>${q.nw?`<p style="text-align:center">🎁 New answers learned: +${q.nw} 💰 credits!</p>`:""}<button class="go" onclick="qzStart()">🔁 Play again</button><button class="go" style="background:#7dd3fc" onclick="QS.st='intro';ui()">📋 Quiz menu</button>`}
+const Q=qBank(q.mode)[q.qs[q.i]],a=q.pick!=null;
+return `<p class="sm">${easy?"🧸 Tiny quiz":"🎓 Big kid quiz"} · Question ${q.i+1} of ${q.qs.length} · ⭐ ${q.s}</p><div class="qq" ${easy?'style="font-size:1.25rem"':""}>${esc(Q[0])}</div>${q.opts.map((o,k)=>`<button class="qo ${a?(o.ok?"ok":q.pick==k?"no":""):""}" ${a?"disabled":""} ${easy?'style="font-size:1.1rem"':""} onclick="qzPick(${k})">${"ABC"[k]}. ${esc(o.t)}</button>`).join("")}${a?`<div class="fixrow"><b>${q.opts[q.pick].ok?"✅ Yes! You got it!":"❌ Not quite!"}</b>${esc(Q[Q.length-1])}</div><button class="go" onclick="qzNext()">${q.i+1>=q.qs.length?"See my stars ➜":"Next ➜"}</button>`:""}`}
+/* ----- Space School menu ----- */
+const SCH={sec:"home"};
+function sch(x){SCH.sec=x;ui();try{scrollTo(0,0)}catch(e){}}
+const bkS=()=>`<button class="mb y bk" onclick="sch('home')">⬅ Space School</button>`;
+const EZ=[["☀️","The Sun is a big, hot ball in the sky."],["🤧","Sometimes the Sun sneezes. That is a solar flare!"],["🫧","A big Sun bubble is called a CME. It floats far away."],["🌍","Earth has an invisible hug. It keeps us safe."],["🌈","Pretty sky lights are called auroras."],["🌙","The Moon has no air. Astronauts bring air in a tank."],["🏠","The base is a safe house. Hide there when the Sun sneezes!"],["🧊","Ice on the Moon is frozen water. Yum, a drink!"],["🌯","Astronauts eat tortillas. No crumbs floating around!"],["🥬","Plants can grow in space. Fresh lettuce!"],["🤖","A rover is a robot helper. It likes a safe place too."],["🔧","If something breaks, fix it! Hold R in the base."]];
+const liveHTML=()=>{const m=mood(),st=NS.busy?"☎️ Calling NASA…":NS.st=="live"?"🟢 LIVE":NS.st=="cache"?"💾 Saved copy":"📼 Old examples",top=NS.flares.slice(0,3).map(f=>`${f.cls[0]=="X"?"🦖":f.cls[0]=="M"?"🐯":"🐣"} ${esc(f.cls)} · ${fmtD(f.t)}`).join("<br>");return `<div class="lv"><b>📡 Live Sun report</b> <span class="chip">${st}</span><div style="font-size:1.8rem;line-height:1.1">${m.e}</div><div>${esc(m.t)}</div>${top?`<div style="margin-top:4px;font-size:.82rem">Latest flares:<br>${top}</div>`:""}</div>`};
+const donkiInfo=()=>`<p>🔭 <b>What is DONKI?</b> It is NASA's Space Weather Database (Database Of Notifications, Knowledge, Information). Scientists write down every Sun event there, like a diary of the Sun! <a href="https://ccmc.gsfc.nasa.gov/tools/DONKI/" target="_blank" rel="noopener noreferrer">🔗 Open DONKI</a></p>
+<details class="ph" open><summary>⚡ FLR · Solar Flares</summary><p>Sorted by X-ray brightness: C is minor, M is moderate and X is major. M and X flares can cause radio blackouts and switch off electronics that have no shield.</p><p class="gm">🎮 In the game: flare warnings use real NASA flares. M and X make radio static, and your rover goes offline if the shield is weak.</p></details>
+<details class="ph"><summary>🌪️ CME · Coronal Mass Ejections</summary><p>Giant clouds of Sun-stuff. NASA writes down their speed in km/s, how wide they are and where they are heading. They take hours to days to arrive, so there is time to get ready.</p><p class="gm">🎮 In the game: a CME countdown shows up. Be in the base with the shield on before it hits!</p></details>
+<details class="ph"><summary>☢️ SEP · Solar Energetic Particles</summary><p>Super-fast tiny bits sent out by big solar events. They can hurt astronauts who are outside without a shield.</p><p class="gm">🎮 In the game: M and X flares drain your stamina and health when you are outside.</p></details>
+<details class="ph"><summary>🌩️ GST · Geomagnetic Storms</summary><p>Measured with the Kp number from 0 to 9. Kp 5 is minor (G1), Kp 7 is strong (G3) and Kp 9 is extreme (G5). Big storms stress power grids, satellites and navigation.</p><p class="gm">🎮 In the game: a storm weakens your power, wobbles your GPS and paints the sky with aurora light.</p></details>`;
+function schoolHTML(){const s=SCH.sec,W='style="max-width:640px"';
+if(s=="learn"){const TB=[["sun","🌞 Sun"],["earth","🌍 Earth"],["api","📡 NASA DONKI"],["fix","🔧 Fix-it"],["food","🍽 Food"]];if(!TB.some(t=>t[0]==SS))SS="sun";
+return `<div class="mwrap" ${W}><h2 class="mh">📖 Learn</h2><div class="panel">${liveHTML()}<div class="sbtabs">${TB.map(t=>`<button class="${SS==t[0]?"on":""}" onclick="SS='${t[0]}';ui()">${t[1]}</button>`).join("")}</div>${sideBody()}</div>${bkS()}</div>`}
+if(s=="easy")return `<div class="mwrap" ${W}><h2 class="mh">🧸 Super Easy</h2><div class="panel"><p>Tiny words for tiny astronauts! 👶🚀</p></div>${EZ.map(x=>`<div class="panel ez"><span>${x[0]}</span><b>${x[1]}</b></div>`).join("")}${mb("g","🧸 Try the tiny quiz!","qzStart('easy');sch('quiz')")}${bkS()}</div>`;
+if(s=="quiz")return `<div class="mwrap" ${W}><h2 class="mh">❓ Quizzes</h2><div class="panel">${quizBody()}</div>${bkS()}</div>`;
+return `<div class="mwrap"><h2 class="mh">📚 Space School</h2><div class="panel"><p>Welcome, young astronaut! 🧑‍🚀 Pick a class.</p></div><div class="mbs">${mb("b","📖 Learn<small>Sun, Earth, NASA DONKI, fixes and food</small>","sch('learn')")}${mb("g","🧸 Super Easy<small>Tiny words for age 5</small>","sch('easy')")}${mb("o","❓ Quizzes<small>Test yourself and win credits</small>","sch('quiz')")}</div>${BACK}</div>`}
+
+/* ===== v8: flare info, base pointer, popups, tutorial ===== */
+const flInfo=f=>`${f.cls} flare · ${fmtD(f.t)} · Sun spot ${f.loc}${f.ar?` · region ${f.ar}`:""}`;
+function ptr(c,sx,sy,lb,col,d){const b=Math.sin(Date.now()/180)*6;c.save();c.lineWidth=4;c.strokeStyle="#14123a";c.fillStyle=col;c.textAlign="center";
+if(sx>30&&sx<VW-30&&sy>70&&sy<VH-30){c.beginPath();c.moveTo(sx,sy+b);c.lineTo(sx-16,sy-26+b);c.lineTo(sx+16,sy-26+b);c.closePath();c.stroke();c.fill();c.font="bold 15px sans-serif";c.strokeText(lb,sx,sy-34+b);c.fillStyle="#fff";c.fillText(lb,sx,sy-34+b)}
+else{const a=Math.atan2(sy-VH/2,sx-VW/2),k=Math.min((VW/2-46)/Math.abs(Math.cos(a)),(VH/2-46)/Math.abs(Math.sin(a))),px=VW/2+Math.cos(a)*k,py=VH/2+Math.sin(a)*k;c.translate(px,py);c.beginPath();c.arc(0,0,26,0,7);c.fillStyle="#14123add";c.fill();c.strokeStyle=col;c.stroke();c.save();c.rotate(a);c.fillStyle=col;c.beginPath();c.moveTo(21+b/2,0);c.lineTo(2,-13);c.lineTo(2,13);c.closePath();c.fill();c.restore();
+const t=`${lb} ${Math.round(d/10)} m`;c.font="bold 13px sans-serif";c.strokeStyle="#14123a";c.lineWidth=4;c.strokeText(t,-Math.cos(a)*50,-Math.sin(a)*40+4);c.fillStyle="#fff";c.fillText(t,-Math.cos(a)*50,-Math.sin(a)*40+4)}
+c.restore()}
+function pointers(c,ox,oy){if(G.tut){const t=G.tut.tg;if(t)ptr(c,t.x-ox,t.y-oy,"👆 Here!","#facc15",Math.hypot(t.x-G.x,t.y-G.y));return}
+if(!inB(G.x,G.y)){const bx=Z.x+Z.w/2,by=Z.y+Z.h/2;ptr(c,bx-ox,Z.y-20-oy,"🏠 BASE","#4ade80",Math.hypot(bx-G.x,by-G.y))}}
+function addPop(e,h,m){G.pops.push({e,h,m,l:6});if(G.pops.length>2)G.pops.shift();beep(250,.35)}
+function popTick(dt,ins){G.pops=G.pops.filter(p=>(p.l-=dt)>0);const o=G.o2<12?2:G.o2<30?1:0,f=G.food<10?2:G.food<25?1:0;
+if(o>G.l2){G.l2=o;if(!ins)addPop("💨",o>1?"VERY LOW AIR!":"Low air!","Run home to the base 🏠 or grab 🧊 Water Ice!")}if(G.o2>=50)G.l2=0;
+if(f>G.lf){G.lf=f;addPop("🍎",f>1?"SO HUNGRY!":"Tummy rumble!","Hold F in the base to eat, or press Q for a snack!")}if(G.food>=40)G.lf=0}
+function drawPops(c){(G.pops||[]).forEach((p,i)=>{const y=96+i*106,a=Math.min(1,p.l*2),b=Math.sin(Date.now()/150)*2;c.save();c.globalAlpha=a;c.fillStyle="#fff9e6";c.strokeStyle=(Date.now()/250|0)%2?"#ef4444":"#14123a";c.lineWidth=5;c.beginPath();c.roundRect(130,y+b,540,92,18);c.fill();c.stroke();c.fillStyle="#14123a";c.textAlign="left";c.font="42px sans-serif";c.fillText(p.e,146,y+b+60);c.font="bold 22px sans-serif";c.fillText(p.h,206,y+b+36);c.font="600 15px sans-serif";c.fillText(p.m,206,y+b+66);c.restore()})}
+const baseT=()=>({x:Z.x+Z.w/2,y:Z.y-20});
+function tutRock(k){const r={x:clamp(G.x+G.fx*110,40,WW-40),y:clamp(G.y+40,40,WH-40),k};while(inB(r.x,r.y))r.y+=40;G.rocks.push(r);G.tut.rk=r}
+const TUT=[
+{t:"👋 Hi, I'm Astro! Let's learn to move. Press the arrow keys (or W A S D) to WALK. On a phone, tap the little arrows. Walk a bit! 🚶",ok:()=>Math.hypot(G.x-G.tut.sx,G.y-G.tut.sy)>260},
+{t:"🪨 Great walking! Now walk onto the grey rock with the yellow arrow to pick it up!",setup:()=>tutRock(0),tg:()=>({x:G.tut.rk.x,y:G.tut.rk.y-16}),ok:()=>G.carry.length>=1||G.tally.some(v=>v>0)},
+{t:"✨ Yay! Some rocks are shiny and hard. Stand close to the BLUE rock and HOLD the E key (or the ⛏ Mine button) until it pops!",setup:()=>tutRock(3),tg:()=>({x:G.tut.rk.x,y:G.tut.rk.y-16}),ok:()=>G.carry.includes(3)||G.tally[3]>0},
+{t:"🏠 Your bag has rocks! Follow the arrow back to the BASE and walk inside. Rocks turn into ⭐ points there!",tg:baseT,ok:()=>inB(G.x,G.y)&&G.tally.some(v=>v>0)},
+{t:"💨 The Moon has NO air! The 💨 bar at the top is your air. Inside the base it fills up again. If it gets low, a big warning will pop up!",man:1},
+{t:"🍎 This bar is your food. When your tummy is empty, stand in the base and HOLD the F key to eat a meal. Try it now!",setup:()=>{G.food=50;G.ration=Math.max(G.ration,2)},tg:()=>inB(G.x,G.y)?null:baseT(),ok:()=>inB(G.x,G.y)&&G.food>=70,man:1},
+{t:"☀️ Uh-oh, the Sun is sneezing! That is a SOLAR FLARE, and it is a REAL one from NASA! Run into the base and wait there until it is gone.",setup:()=>{G.fl.push(flareFor(G.t+2));G.tut.fe=G.t+37},tg:()=>inB(G.x,G.y)?null:baseT(),ok:()=>G.t>=G.tut.fe,man:1},
+{t:"🔧 Other tricks: hold R in the base to fix broken things. Shift = zoom (but zoom uses lots of air!). ☄️ If a red circle shows up, step out of it!",man:1},
+{t:"🎉 YAY! You are a real space explorer now! Press Finish, then pick PLAY for a real trip!",man:1,last:1}];
+function tutGo(i){const t=G.tut;if(i>=TUT.length)return tutSkip();t.i=i;const s=TUT[i];if(s.setup)s.setup();t.tg=s.tg?s.tg():null}
+function tutTick(){G.o2=Math.max(G.o2,45);G.hp=100;G.food=Math.max(G.food,40);const s=TUT[G.tut.i];if(s&&s.ok&&s.ok()){beep(1000,.15);tutGo(G.tut.i+1)}}
+function tutNext(){if(!G.tut)return;const s=TUT[G.tut.i];if(s.last)tutSkip();else tutGo(G.tut.i+1)}
+function tutSkip(){G={ph:"menu"};MS="home";ui()}
+function askTut(){if(confirm("🎓 Do you want a tutorial? It is easy and short, and I will show you how to play!"))begin(300,true)}
+function stab(t){SS=t;buildSide()}
+function buildSide(){const e=$("#side");if(!e)return;const TB=[["quiz","❓ Quiz"],["fix","🔧 Fix-it"],["api","📡 NASA"],["food","🍽 Food"]];
+e.innerHTML=`<h2>📚 Space School</h2><div id="live" class="lv"></div><div class="sbtabs">${TB.map(t=>`<button class="${SS==t[0]?"on":""}" onclick="stab('${t[0]}')">${t[1]}</button>`).join("")}</div>${sideBody()}`;sideLive()}
+function sideLive(){const e=$("#live");if(!e)return;const m=mood(),st=NS.busy?"☎️ Calling NASA…":NS.st=="live"?"🟢 LIVE":NS.st=="cache"?"💾 Saved copy":"📼 Old examples",
+top=NS.flares.slice(0,3).map(f=>`${f.cls[0]=="X"?"🦖":f.cls[0]=="M"?"🐯":"🐣"} ${esc(f.cls)} · ${fmtD(f.t)}`).join("<br>");
+e.innerHTML=`<b>📡 Live Sun report</b> <span class="chip">${st}</span><div style="font-size:1.8rem;line-height:1.1">${m.e}</div><div>${esc(m.t)}</div>${top?`<div style="margin-top:4px;font-size:.82rem">Latest flares:<br>${top}</div>`:""}${NS.at?`<div style="font-size:.75rem;opacity:.8">Asked NASA at ${new Date(NS.at).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</div>`:""}`}
+buildSide();
+loadNasa();
+ui();let lt=performance.now();(function loop(n){const dt=Math.min(.05,(n-lt)/1e3);lt=n;update(dt);draw();if(G.ph=="menu")drawMenu(n);requestAnimationFrame(loop)})(lt);
+</script>
+</body>
+</html>

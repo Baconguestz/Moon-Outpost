@@ -21,7 +21,7 @@ const MIME_TYPES = {
 
 const server = http.createServer((req, res) => {
   const reqUrl = (req.url || '/').split('?')[0];
-  let filePath = path.join(ROOT, reqUrl === '/' ? 'moon-outpost-v10.html' : reqUrl);
+  let filePath = path.join(ROOT, reqUrl === '/' ? 'index.html' : reqUrl);
 
   // Prevent directory traversal
   if (!filePath.startsWith(ROOT)) {

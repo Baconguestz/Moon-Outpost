@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Moon Outpost</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main>
+    <div class="layout">
+      <section class="game">
+        <div class="hud">
+          <div class="hb">💨 Air <span id="vo"></span><i><b id="bo"></b></i></div>
+          <div class="hb">🍎 Food <span id="vf"></span><i><b id="bf"></b></i></div>
+          <div class="hb">❤️ Health <span id="vh"></span><i><b id="bh"></b></i></div>
+          <div class="hb">⚡ Stamina <span id="vs"></span><i><b id="bs"></b></i></div>
+        </div>
+        <div class="info"><span id="d"></span><span id="c"></span><span id="n"></span><span id="s"></span></div>
+        <div class="info"><span id="r"></span></div>
+        <div class="info"><span id="ms"></span></div>
+        <div class="prob" id="pr" hidden></div>
+        <div class="tip" id="tip" hidden>
+          <span class="av">👩‍🚀</span><span id="tt"></span>
+          <button id="tn" hidden onclick="tutNext()">Next ➜</button>
+          <button id="tk" hidden onclick="tutSkip()">Quit ✖</button>
+        </div>
+        <div class="wrap">
+          <canvas id="cv" width="800" height="500" aria-label="Moon surface"></canvas>
+          <canvas id="mc" aria-hidden="true"></canvas>
+          <div id="ov"></div>
+        </div>
+        <div class="ctl" id="ctl">
+          <div class="pad">
+            <span></span><button data-k="up" aria-label="up">▲</button><span></span>
+            <button data-k="left" aria-label="left">◀</button><button data-k="down" aria-label="down">▼</button><button data-k="right" aria-label="right">▶</button>
+          </div>
+          <button class="ab" data-k="sprint">💨 Sprint<br>(Shift)</button>
+          <button class="ab" data-k="mine">⛏ Mine<br>(E)</button>
+          <button class="ab" data-k="eat">🥬 Meal<br>(F)</button>
+          <button class="ab" data-k="fix" style="background:#4ade80">🔧 Fix<br>(R)</button>
+          <button class="ab" data-k="snack" style="background:#fb923c">🍱 Snack<br>(Q)</button>
+          <button class="ab" id="bb" style="background:#4aa3ff">⚙ Base<br>(B)</button>
+        </div>
+        <p class="mut">🎮 WASD or arrows = walk · Shift = zoom · hold E = dig · hold F = eat (in base) · B = base shop & power · R = fix things · Q = quick snack · 1-9 = pick a snack. 📡 Sun-flare facts come from NASA's DONKI space-weather database (live when the internet allows, a saved copy otherwise). Numbers are made simpler for kids!</p>
+      </section>
+    </div>
+  </main>
+
+  <!-- Modular Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/nasa.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
